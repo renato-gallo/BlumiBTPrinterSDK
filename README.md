@@ -1,6 +1,13 @@
 # BLUMI Printer SDK
 
-Una librería JavaScript premium, modular y extensible basada en ES Modules para la impresión de recibos térmicos mediante ESC/POS utilizando las APIs de Web Bluetooth (BLE), WebUSB y Web Serial.
+[![npm version](https://img.shields.io/npm/v/blumi-printer-sdk.svg?style=flat-square)](https://www.npmjs.com/package/blumi-printer-sdk)
+[![npm downloads](https://img.shields.io/npm/dm/blumi-printer-sdk.svg?style=flat-square)](https://www.npmjs.com/package/blumi-printer-sdk)
+[![license](https://img.shields.io/npm/l/blumi-printer-sdk.svg?style=flat-square)](https://github.com/renato-gallo/BlumiBTPrinterSDK/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/renato-gallo/BlumiBTPrinterSDK.svg?style=flat-square)](https://github.com/renato-gallo/BlumiBTPrinterSDK/stargazers)
+[![Plataformas](<https://img.shields.io/badge/plataformas-Chrome%20%7C%20Edge%20%7C%20Android%20%7C%20Electron%20%7C%20Tauri-green?style=flat-square>)](#)
+[![Conexiones](<https://img.shields.io/badge/conexiones-Bluetooth%20%7C%20USB%20%7C%20Serial%20%7C%20Red-blue?style=flat-square>)](#)
+
+Una librería JavaScript modular y extensible basada en ES Modules para la impresión de recibos térmicos mediante ESC/POS utilizando las APIs de Web Bluetooth (BLE), WebUSB y Web Serial.
 
 ## Características
 
@@ -58,6 +65,7 @@ await impresora.ticket(async (ticket) => {
 Puedes cambiar el controlador de conexión física importándolo desde el namespace `/connections`:
 
 ### Impresión por USB (WebUSB)
+
 ```javascript
 import { BlumiPrinter } from 'blumi-printer-sdk';
 import { WebUSBConnection } from 'blumi-printer-sdk/connections';
@@ -72,7 +80,9 @@ await impresora.connect(); // Solicita permiso de puerto USB e inicia
 ```
 
 ### Impresión por Red WiFi o Ethernet (TCP Directo)
+
 *Soportado de forma nativa en entornos híbridos (Tauri, Electron y Node.js).*
+
 ```javascript
 import { BlumiPrinter } from 'blumi-printer-sdk';
 import { NetworkConnection } from 'blumi-printer-sdk/connections';
@@ -87,6 +97,7 @@ await impresora.connect(); // Conecta directamente al socket TCP
 ```
 
 ### Impresión por Puerto Serie COM (Web Serial)
+
 ```javascript
 import { BlumiPrinter } from 'blumi-printer-sdk';
 import { WebSerialConnection } from 'blumi-printer-sdk/connections';
@@ -118,6 +129,24 @@ await impresora.connect(); // Abre diálogo nativo de puertos COM
 
 ## Documentación
 
-Para ver los parámetros detallados de los métodos y clases, consulta la guía [API.md](file:///c:/Users/Windows%2010%20Pro/Desktop/Clientes/MundoBarefoot/API.md).
-Para contribuir con el desarrollo del SDK, lee [CONTRIBUTING.md](file:///c:/Users/Windows%2010%20Pro/Desktop/Clientes/MundoBarefoot/CONTRIBUTING.md).
-Sigue las correcciones y versiones en [CHANGELOG.md](file:///c:/Users/Windows%2010%20Pro/Desktop/Clientes/MundoBarefoot/CHANGELOG.md) y consulta la hoja de ruta de la librería en [ROADMAP.md](file:///c:/Users/Windows%2010%20Pro/Desktop/Clientes/MundoBarefoot/ROADMAP.md).
+Para ver los parámetros detallados de los métodos y clases, consulta la guía [API.md](API.md).
+Para contribuir con el desarrollo del SDK, lee [CONTRIBUTING.md](CONTRIBUTING.md).
+Sigue las correcciones y versiones en [CHANGELOG.md](CHANGELOG.md) y consulta la hoja de ruta de la librería en [ROADMAP.md](ROADMAP.md).
+
+---
+
+## Autor
+
+**Renato Alexander Gallo Gómez**
+
+- 🌐 Sitio personal: [renatogallo.com](https://renatogallo.com)
+- 🏢 Empresa: [blumi.cl](https://blumi.cl)
+- 📧 Contacto: r.gallogomez [at] gmail [dot] com
+
+Desarrollado en Chile 🇨🇱 con foco en el ecosistema de comercio e impresión térmica de Latinoamérica.
+
+---
+
+## Licencia
+
+MIT © [Renato Gallo](https://renatogallo.com)

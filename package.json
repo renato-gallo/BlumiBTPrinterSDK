@@ -1,0 +1,50 @@
+{
+  "name": "blumi-printer-sdk",
+  "version": "2.0.0",
+  "description": "Javascript ES6 library for ESC/POS BLE thermal printing with custom profiles, dither options, and document builders.",
+  "type": "module",
+  "main": "./src/core/BlumiPrinter.js",
+  "exports": {
+    ".": "./src/core/BlumiPrinter.js",
+    "./connections": "./src/connections/index.js",
+    "./profiles": "./src/profiles/index.js",
+    "./encoding": "./src/encoding/CharsetEncoder.js",
+    "./images": "./src/images/ImageProcessor.js",
+    "./queue": "./src/queue/PrinterQueue.js",
+    "./templates": "./src/templates/index.js"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "CHANGELOG.md",
+    "API.md",
+    "CONTRIBUTING.md",
+    "ROADMAP.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node tests/CharsetEncoder.test.js"
+  },
+  "keywords": [
+    "escpos",
+    "thermal-printer",
+    "web-bluetooth",
+    "ble",
+    "bluetooth-printer",
+    "dithering",
+    "ticket",
+    "sii",
+    "pos"
+  ],
+  "author": "BLUMI SPA",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blumi-spa/blumi-printer-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/blumi-spa/blumi-printer-sdk/issues"
+  },
+  "homepage": "https://github.com/blumi-spa/blumi-printer-sdk#readme",
+  "dependencies": {}
+}

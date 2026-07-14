@@ -23,8 +23,10 @@ import { JP80Profile } from './src/profiles/JP80Profile.js';
 
 ## Inicio Rápido
 
+Por defecto, la librería utiliza la conexión Web Bluetooth:
+
 ```javascript
-// Instanciar la impresora con un perfil de hardware específico
+// Instanciar la impresora (usa BluetoothConnection por defecto)
 const impresora = new BlumiPrinter({
   profile: new JP80Profile(),
   characterWidth: 48,
@@ -49,6 +51,53 @@ await impresora.ticket(async (ticket) => {
         .feed(3)
         .cut();
 });
+```
+
+## Múltiples Interfaces (USB / Serial / Red)
+
+Puedes cambiar el controlador de conexión física importándolo desde el namespace `/connections`:
+
+### Impresión por USB (WebUSB)
+```javascript
+import { BlumiPrinter } from 'blumi-printer-sdk';
+import { WebUSBConnection } from 'blumi-printer-sdk/connections';
+import { JP80Profile } from 'blumi-printer-sdk/profiles';
+
+const impresora = new BlumiPrinter({
+  connection: new WebUSBConnection(), // Driver USB
+  profile: new JP80Profile()
+});
+
+await impresora.connect(); // Solicita permiso de puerto USB e inicia
+```
+
+### Impresión por Red WiFi o Ethernet (TCP Directo)
+*Soportado de forma nativa en entornos híbridos (Tauri, Electron y Node.js).*
+```javascript
+import { BlumiPrinter } from 'blumi-printer-sdk';
+import { NetworkConnection } from 'blumi-printer-sdk/connections';
+import { JP80Profile } from 'blumi-printer-sdk/profiles';
+
+const impresora = new BlumiPrinter({
+  connection: new NetworkConnection('192.168.1.100', 9100), // IP y puerto Raw TCP
+  profile: new JP80Profile()
+});
+
+await impresora.connect(); // Conecta directamente al socket TCP
+```
+
+### Impresión por Puerto Serie COM (Web Serial)
+```javascript
+import { BlumiPrinter } from 'blumi-printer-sdk';
+import { WebSerialConnection } from 'blumi-printer-sdk/connections';
+import { JP80Profile } from 'blumi-printer-sdk/profiles';
+
+const impresora = new BlumiPrinter({
+  connection: new WebSerialConnection(), // Driver de puerto Serie
+  profile: new JP80Profile()
+});
+
+await impresora.connect(); // Abre diálogo nativo de puertos COM
 ```
 
 ## Estructura de Carpetas

@@ -131,14 +131,25 @@ Envía la orden física de corte de papel (completo o parcial).
 
 ## 4. Controladores de Conexión
 
-Todos los drivers heredan de `ConnectionInterface` e implementan:
-- `connect()`
-- `disconnect()`
-- `send(bytes)`
-- `isConnected()`
+Todos los drivers heredan de la clase abstracta `ConnectionInterface` e implementan la interfaz común de operaciones:
+*   `connect()`: Inicia el diálogo de vinculación física o establece la comunicación. Retorna `Promise<boolean>`.
+*   `disconnect()`: Cierra el puerto/socket liberando los recursos de hardware de forma ordenada. Retorna `Promise<void>`.
+*   `send(bytes)`: Escribe un arreglo binario `Uint8Array` en el canal de salida activo. Retorna `Promise<void>`.
+*   `isConnected()`: Verifica y retorna el estado lógico del canal de conexión (`boolean`).
 
 ### `BluetoothConnection`
-Driver Web Bluetooth para impresoras BLE. Utiliza por defecto el UUID de servicio Microchip (`49535343-fe7d-4ae5-8fa9-9fafd205e455`) y característica de escritura (`49535343-8841-43f4-a8d4-ecbe34729bb3`). Realiza fraccionamiento (MTU pacing) en paquetes de 100 bytes con 15ms de retraso para evitar pérdidas de datos en hardware de bajo costo.
+Driver Web Bluetooth para impresoras BLE. Utiliza por defecto el UUID de servicio Microchip (`49535343-fe7d-4ae5-8fa9-9fafd205e455`) y característica de escritura (`49535343-8841-43f4-a8d4-ecbe34729bb3`). Realiza fraccionamiento (MTU pacing) en paquetes de 100 bytes con 15ms de retraso de forma interna para evitar desbordamientos y bloqueos de GATT.
+
+### `WebUSBConnection`
+Driver WebUSB compatible con navegadores Chromium (Chrome/Edge). Filtra dispositivos emparejados mediante la clase de impresora universal `0x07`. Localiza de forma dinámica la interfaz bulk OUT activa del fabricante del hardware y fracciona la escritura en bloques de 64 bytes (estándar USB bulk).
+
+### `WebSerialConnection`
+Driver Web Serial API para conexiones serie a través de adaptadores RS232 o conversores USB-a-Serie. Se conecta utilizando la velocidad estándar del hardware serie (`baudRate: 9600`) y opera mediante flujos de corrientes de escritura nativos (`WritableStream`).
+
+### `NetworkConnection`
+Driver TCP Raw Socket para impresoras de red locales mediante cable Ethernet o WiFi en el puerto `9100`.
+- `constructor(host, port)`: Permite indicar la dirección IP (por defecto `192.168.1.100`) y puerto (por defecto `9100`).
+- **Compatibilidad**: Diseñado para integrarse nativamente en entornos Electron, Tauri y Node.js importando de forma dinámica el módulo `'net'`. Lanza un error controlado si es invocado en entornos de navegadores web puros debido a restricciones del Sandbox de red.
 
 ---
 

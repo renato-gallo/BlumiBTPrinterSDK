@@ -106,6 +106,6 @@ export class CharsetEncoder {
       '¿': '',  '¡': '',
       'º': 'o', 'ª': 'a'
     };
-    return text.replace(/[áéíóúñÁÉÍÓÚüÜ¿¡ºª]/g, char => map[char] !== undefined ? map[char] : char);
+    return text.replace(/[áéíóúñÑÁÉÍÓÚüÜ¿¡ºª]/g, char => map[char] !== undefined ? map[char] : char);
   }
 }

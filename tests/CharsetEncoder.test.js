@@ -49,8 +49,8 @@ function testCharsetEncoder() {
 
   // Test Spanish normalization
   console.log("=== RUNNING SPANISH NORMALIZATION TESTS ===");
-  const testNormInput = "¡Hola, señor! ¿Cómo está él? 20º y 1ª.";
-  const expectedNorm = "Hola, senor! Como esta el? 20o y 1a.";
+  const testNormInput = "¡Hola, señor y SEÑORA! ¿Cómo está él? 20º y 1ª.";
+  const expectedNorm = "Hola, senor y SENORA! Como esta el? 20o y 1a.";
   const normOutput = CharsetEncoder.normalizeSpanish(testNormInput);
   if (normOutput === expectedNorm) {
     console.log(`[PASS] normalizeSpanish output matches: "${normOutput}"`);

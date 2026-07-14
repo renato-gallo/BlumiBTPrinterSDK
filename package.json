@@ -1,6 +1,6 @@
 {
   "name": "blumi-printer-sdk",
-  "version": "3.1.5",
+  "version": "3.1.6",
   "description": "Librería Javascript ES6 para impresión térmica ESC/POS mediante Web Bluetooth (BLE), WebUSB y Web Serial con perfiles de hardware personalizados, tramado de imágenes y constructores semánticos.",
   "type": "module",
   "main": "./src/core/BlumiPrinter.js",

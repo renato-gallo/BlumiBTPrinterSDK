@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [3.1.0] - 2026-07-14
+
+### Added
+- **Controlador WebUSB**: Implementación concreta del driver de conexión física `WebUSBConnection` para imprimir directamente por USB desde navegadores que lo soporten (como Chrome/Edge) sin necesidad de software puente.
+- **Controlador WebSerial**: Implementación concreta del driver de conexión física `WebSerialConnection` para comunicar con impresoras térmicas conectadas a puertos COM serie.
+- **Controlador de Red TCP/IP (WiFi/Ethernet)**: Creación del driver `NetworkConnection` compatible nativamente con entornos híbridos (Tauri, Electron y Node.js) que se conecta directamente por sockets de red en el puerto 9100.
+
 ## [3.0.0] - 2026-07-14
 
 ### Added

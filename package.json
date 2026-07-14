@@ -1,6 +1,6 @@
 {
   "name": "blumi-printer-sdk",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Javascript ES6 library for ESC/POS BLE thermal printing with custom profiles, dither options, and document builders.",
   "type": "module",
   "main": "./src/core/BlumiPrinter.js",

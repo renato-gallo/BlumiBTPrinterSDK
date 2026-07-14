@@ -1,122 +1,152 @@
-# BLUMI Printer SDK - API Reference
+# BLUMI Printer SDK - Referencia de la API
 
-Comprehensive class and method reference for the **BLUMI Printer SDK**.
+Referencia completa de clases y métodos de la librería **BLUMI Printer SDK**.
 
 ---
 
 ## 1. BlumiPrinter
 
-The main orchestrator class that coordinates connections, active profiles, task serialization, and document builders.
+La clase principal que coordina las conexiones, los perfiles de hardware activos, la serialización de tareas de impresión y las plantillas de documentos.
 
 ### `constructor(options = {})`
-- `options.profile`: The printer hardware profile class. Defaults to `new EpsonProfile()`.
-- `options.connection`: The connection driver backend. Defaults to `new BluetoothConnection()`.
-- `options.characterWidth`: Number of characters per line. Defaults to profile standard (48).
-- `options.charset`: The default character set. Defaults to `'cp850'`.
+- `options.profile`: Instancia de perfil de hardware. Por defecto `new EpsonProfile()`.
+- `options.connection`: Instancia del controlador de conexión. Por defecto `new BluetoothConnection()`.
+- `options.characterWidth`: Límite de caracteres por línea. Por defecto el estándar del perfil (48).
+- `options.charset`: Juego de caracteres predeterminado. Por defecto `'cp850'`.
+- `options.sanitizeSpanish`: Booleano para activar la normalización de caracteres del español a ASCII de 7 bits. Por defecto `false`.
 
 ### `async connect()`
-Prompts user pairing panel and connects to the printer GATT/USB.
+Despliega la ventana de emparejamiento nativa y conecta a la impresora mediante GATT/USB/Serie.
 
 ### `async disconnect()`
-Closes active device connection.
+Cierra la conexión activa actual con el dispositivo de hardware.
 
 ### `async reconnect()`
-Reconnects to the previously paired device.
+Intenta recuperar de forma automática la conexión con el último dispositivo emparejado.
 
 ### `status()`
-Returns an object indicating connection flags: `{ connected: boolean, reconnecting: boolean, device: { name, id } }`.
+Retorna un objeto con banderas y detalles del estado de conexión: `{ connected: boolean, reconnecting: boolean, device: { name, id } }`.
 
 ### `async ticket(callback)`
-Builds a document using `TicketBuilder` and prints it.
-- `callback(ticket)`: A function receiving a `TicketBuilder` instance.
+Construye e imprime un ticket básico mediante `TicketBuilder`.
+- `callback(ticket)`: Función que recibe una instancia de `TicketBuilder`.
 
 ### `async invoice(callback)`
-Builds a document using `InvoiceBuilder` and prints it.
-- `callback(invoice)`: A function receiving an `InvoiceBuilder` instance.
+Construye e imprime una factura mediante `InvoiceBuilder`.
+- `callback(invoice)`: Función que recibe una instancia de `InvoiceBuilder`.
 
 ### `async kitchen(callback)`
-Builds a document using `KitchenBuilder` and prints it.
-- `callback(kitchen)`: A function receiving a `KitchenBuilder` instance.
+Construye e imprime una comanda de cocina mediante `KitchenBuilder`.
+- `callback(kitchen)`: Función que recibe una instancia de `KitchenBuilder`.
 
 ### `async delivery(callback)`
-Builds a document using `DeliveryBuilder` and prints it.
-- `callback(delivery)`: A function receiving a `DeliveryBuilder` instance.
+Construye e imprime un vale de entrega mediante `DeliveryBuilder`.
+- `callback(delivery)`: Función que recibe una instancia de `DeliveryBuilder`.
+
+### `async receipt(callback)`
+Construye e imprime una boleta o recibo estándar mediante `ReceiptBuilder`.
+- `callback(receipt)`: Función que recibe una instancia de `ReceiptBuilder`.
+
+### `async openFactura(callback)`
+Construye e imprime un comprobante compatible con OpenFactura mediante `OpenFacturaBuilder`.
+- `callback(openFactura)`: Función que recibe una instancia de `OpenFacturaBuilder`.
+
+### `async siiReceipt(callback)`
+Construye e imprime una boleta oficial regulada por el SII de Chile mediante `SiiReceiptBuilder`.
+- `callback(siiReceipt)`: Función que recibe una instancia de `SiiReceiptBuilder`.
 
 ---
 
 ## 2. TicketBuilder
 
-The base semantic template builder. Exposes chainable design methods.
+El constructor de plantillas semánticas base. Expone métodos encadenables para diagramar comprobantes.
 
 ### `text(string)`
-Appends a line of text (automatically adds trailing `\n`).
+Añade una línea de texto plano (aplica automáticamente el salto de línea `\n` final).
 
 ### `bold(enabled = true)`
-Enables/disables bold text.
+Habilita o deshabilita la impresión en negrita.
+
+### `underline(level = true)`
+Habilita o deshabilita el subrayado (puede ser booleano o valor numérico de grosor 0-2).
+
+### `reverse(enabled = true)`
+Habilita o deshabilita el modo inverso (blanco sobre negro).
+
+### `rotation(enabled = true)`
+Habilita o deshabilita la rotación de caracteres en 90 grados.
 
 ### `align(position)`
-Sets alignment: `'left'`, `'center'`, or `'right'`.
+Alinea el texto: `'left'`, `'center'` o `'right'`.
+
+### `center()`, `left()`, `right()`
+Alineaciones rápidas directas.
 
 ### `size(width, height)`
-Changes text scaling (width/height multipliers from 1 to 8).
+Modifica la escala del texto (multiplicadores de ancho y alto de 1 a 8).
 
 ### `line(char = '-')`
-Prints a line of repeating characters stretching the full paper width.
+Imprime una línea horizontal de caracteres repetidos abarcando el ancho del papel.
 
 ### `row(left, right)`
-Formats two columns, left and right aligned, with automated text truncation.
+Genera una fila con dos columnas alineadas a los extremos (izquierdo y derecho) con ajuste automático de espacio intermedio.
 
 ### `total(value)`
-Inserts a total block bounded by double lines.
+Inserta un bloque de totales destacado y envuelto en doble línea horizontal.
 
 ### `qr(url, size = 6, ec = 'M')`
-Embeds a centered native QR code.
+Inserta un código QR centrado nativo.
 
 ### `async image(source, options = {})`
-Loads and rasterizes an image.
-- `options.width`: Output width in pixels (rounded to multiples of 8).
-- `options.threshold`: Cutoff value (0-255).
-- `options.dither`: Image dithering algorithm: `'floyd-steinberg'`, `'atkinson'`, `'bayer'`, or `false` (default threshold).
+Carga y rasteriza una imagen de forma asíncrona.
+- `options.width`: Ancho final de salida en píxeles (múltiplos de 8).
+- `options.threshold`: Valor de umbralización de blanco/negro (0-255).
+- `options.dither`: Algoritmo de tramado: `'floyd-steinberg'`, `'atkinson'`, `'bayer'` o `false` (por defecto umbral clásico).
 
 ### `feed(lines = 1)`
-Feeds paper by `lines`.
+Avanza el papel el número de líneas indicado.
 
-### `cut()`
-Sends a paper-cut instruction.
-
----
-
-## 3. Specialized Builders
-
-### `InvoiceBuilder` (extends `TicketBuilder`)
-- `invoiceHeader(company, customer)`: Appends structured headers.
-- `itemRow(name, qty, price)`: Formats item descriptions and totals.
-- `taxBlock(net, vat, total)`: Standard invoice summary block.
-
-### `SiiReceiptBuilder` (extends `TicketBuilder`)
-- `siiHeader(rut, corporateName)`: Chilean tax ticket header.
-- `siiTimbre(data)`: Renders the SII electronic signature stamp.
+### `cut(partial = false)`
+Envía la orden física de corte de papel (completo o parcial).
 
 ---
 
-## 4. Connections Namespace
+## 3. Constructores Especializados
 
-All connections inherit from `ConnectionInterface` and implement:
+### `ReceiptBuilder` (extiende de `TicketBuilder`)
+- `receiptHeader(title, subtitle, address)`: Añade bloques de dirección y comercio.
+- `item(name, qty, price)`: Formatea filas de ítems con totales de línea.
+- `summary(subtotal, tax, total)`: Resumen del comprobante de ventas con IVA.
+- `footer(msg)`: Mensaje de pie de página centrado.
+
+### `OpenFacturaBuilder` (extiende de `TicketBuilder`)
+- `openFacturaHeader(title, companyRut, docNum)`: Cabecera formal de OpenFactura con Rut.
+- `reference(docType, docNum, date)`: Sección de documentos de referencia relacionados.
+
+### `SiiReceiptBuilder` (extiende de `TicketBuilder`)
+- `siiHeader(rut, companyName, activity, address, resolutionNum, resolutionYear)`: Bloque formal regulado por el SII de Chile.
+- `siiTimbre(signatureData, options)`: Renderiza el Timbre Electrónico del SII mediante PDF417 nativo o código QR de verificación.
+
+---
+
+## 4. Controladores de Conexión
+
+Todos los drivers heredan de `ConnectionInterface` e implementan:
 - `connect()`
 - `disconnect()`
 - `send(bytes)`
 - `isConnected()`
 
 ### `BluetoothConnection`
-Web Bluetooth driver configured with Microchip service UUID (`49535343-fe7d-4ae5-8fa9-9fafd205e455`) and Write characteristic UUID (`49535343-8841-43f4-a8d4-ecbe34729bb3`). Performs automated MTU pacing (chunks of 100 bytes / 15ms delay).
+Driver Web Bluetooth para impresoras BLE. Utiliza por defecto el UUID de servicio Microchip (`49535343-fe7d-4ae5-8fa9-9fafd205e455`) y característica de escritura (`49535343-8841-43f4-a8d4-ecbe34729bb3`). Realiza fraccionamiento (MTU pacing) en paquetes de 100 bytes con 15ms de retraso para evitar pérdidas de datos en hardware de bajo costo.
 
 ---
 
-## 5. Printer Profiles
+## 5. Perfiles de Impresoras
 
-Profiles determine command arrays for different brands:
-- `EpsonProfile`: Standard ESC/POS commands.
-- `XPrinterProfile`: XPrinter configuration overrides.
-- `JP80Profile`: JP80H-UB customization.
-- `SunmiProfile`: Portable tablet printers.
-- `RongtaProfile`: Rongta configuration overrides.
+Los perfiles traducen las directivas semánticas a secuencias binarias ESC/POS de marcas:
+- `EpsonProfile`: Comandos estándar ESC/POS y dimensiones de 80mm (48 columnas).
+- `XPrinterProfile`: Adaptación para impresoras de marca XPrinter.
+- `JP80Profile`: Ajustes para modelo JP80H-UB.
+- `SunmiProfile`: Modificaciones para terminales portátiles Sunmi (papel de 58mm, corte simulado mediante avance).
+- `RongtaProfile` y `GPrinterProfile`: Ajustes finos para impresoras marca Rongta y GPrinter.

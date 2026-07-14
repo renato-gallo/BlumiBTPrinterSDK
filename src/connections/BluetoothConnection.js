@@ -1,8 +1,8 @@
 import { ConnectionInterface } from "./ConnectionInterface.js";
 
 /**
- * Connection driver for Web Bluetooth BLE thermal printers.
- * Extends ConnectionInterface.
+ * Controlador de conexión para impresoras térmicas BLE mediante Web Bluetooth.
+ * Extiende de ConnectionInterface.
  */
 export class BluetoothConnection extends ConnectionInterface {
   constructor() {
@@ -15,13 +15,13 @@ export class BluetoothConnection extends ConnectionInterface {
     this.reconnecting = false;
     this.autoReconnectEnabled = true;
 
-    // Default UUID configurations
+    // Configuraciones de UUID por defecto
     this.SERVICE_UUID = '49535343-fe7d-4ae5-8fa9-9fafd205e455';
     this.CHARACTERISTIC_UUID = '49535343-8841-43f4-a8d4-ecbe34729bb3';
   }
 
   /**
-   * Checks if connection is active.
+   * Verifica si la conexión está activa.
    * @returns {boolean}
    */
   isConnected() {
@@ -29,7 +29,7 @@ export class BluetoothConnection extends ConnectionInterface {
   }
 
   /**
-   * Triggers the Web Bluetooth pairing selection prompt.
+   * Lanza el diálogo nativo del navegador para seleccionar y emparejar el dispositivo Bluetooth.
    * @returns {Promise<BluetoothDevice>}
    */
   async requestDevice() {
@@ -53,12 +53,12 @@ export class BluetoothConnection extends ConnectionInterface {
   }
 
   /**
-   * Establishes GATT connection.
+   * Establece la conexión GATT con el dispositivo.
    * @returns {Promise<boolean>}
    */
   async connect() {
     if (!this.device) {
-      // If we don't have a device, call requestDevice first
+      // Si no tenemos dispositivo registrado, solicitamos emparejamiento primero
       await this.requestDevice();
     }
 
@@ -69,7 +69,7 @@ export class BluetoothConnection extends ConnectionInterface {
       this.service = await this.server.getPrimaryService(this.SERVICE_UUID);
       this.characteristic = await this.service.getCharacteristic(this.CHARACTERISTIC_UUID);
 
-      // Setup spontaneous disconnection listener
+      // Configurar detector de desconexión imprevista
       this.device.removeEventListener('gattserverdisconnected', this._onDisconnected);
       this.device.addEventListener('gattserverdisconnected', this._onDisconnected.bind(this));
 
@@ -84,7 +84,7 @@ export class BluetoothConnection extends ConnectionInterface {
   }
 
   /**
-   * Programmatically closes the GATT connection.
+   * Cierra de forma programada la conexión GATT.
    * @returns {Promise<void>}
    */
   async disconnect() {
@@ -106,12 +106,12 @@ export class BluetoothConnection extends ConnectionInterface {
   }
 
   /**
-   * Reconnects to the previously paired device.
+   * Intenta recuperar la conexión con el último dispositivo emparejado.
    * @returns {Promise<boolean>}
    */
   async reconnect() {
     if (!this.device) {
-      throw new Error("No device recorded. Must pair at least once.");
+      throw new Error("No hay ningún dispositivo registrado. Debe emparejar el dispositivo al menos una vez.");
     }
 
     if (this.isConnected()) {
@@ -124,12 +124,12 @@ export class BluetoothConnection extends ConnectionInterface {
     const retries = 3;
     for (let i = 1; i <= retries; i++) {
       try {
-        console.log(`[BLE] Reconnecting attempt ${i}/${retries}...`);
+        console.log(`[BLE] Intentando reconexión ${i}/${retries}...`);
         await this.connect();
         this.reconnecting = false;
         return true;
       } catch (err) {
-        console.warn(`[BLE] Reconnect attempt ${i} failed:`, err);
+        console.warn(`[BLE] Intento de reconexión ${i} fallido:`, err);
         if (i < retries) {
           await new Promise(resolve => setTimeout(resolve, 2000));
         }
@@ -137,21 +137,21 @@ export class BluetoothConnection extends ConnectionInterface {
     }
 
     this.reconnecting = false;
-    this._notifyStateChange('disconnected', new Error("Reconnection failed after maximum attempts."));
+    this._notifyStateChange('disconnected', new Error("La reconexión ha fallado tras alcanzar el número máximo de intentos."));
     return false;
   }
 
   /**
-   * Dispatches data to printer with MTU chunk throttling to prevent hardware buffer loss.
-   * @param {Uint8Array} bytes - Compiled command stream.
+   * Despacha el flujo de datos a la impresora con fraccionamiento (chunking) para evitar saturación del buffer.
+   * @param {Uint8Array} bytes - Flujo de comandos binarios compilados.
    * @returns {Promise<void>}
    */
   async send(bytes) {
     if (!this.isConnected() || !this.characteristic) {
-      throw new Error("Cannot send data. BLE connection is inactive.");
+      throw new Error("No se pueden enviar datos. La conexión BLE está inactiva.");
     }
 
-    // Packet split size
+    // Tamaño de fraccionamiento del paquete
     const CHUNK_SIZE = 100;
     const DELAY_MS = 15;
 
@@ -162,15 +162,15 @@ export class BluetoothConnection extends ConnectionInterface {
         if (this.characteristic.writeValueWithResponse) {
           await this.characteristic.writeValueWithResponse(chunk);
         } else if (this.characteristic.writeValue) {
-          // Standard/Legacy write (with response)
+          // Escritura estándar/heredada con respuesta
           await this.characteristic.writeValue(chunk);
         } else if (this.characteristic.writeValueWithoutResponse) {
           await this.characteristic.writeValueWithoutResponse(chunk);
         } else {
-          throw new Error("No BLE characteristic write method found.");
+          throw new Error("No se encontró ningún método de escritura en la característica BLE.");
         }
       } catch (err) {
-        console.warn("[BLE] write failed, attempting fallback:", err);
+        console.warn("[BLE] La escritura falló, intentando alternativa de respaldo:", err);
         if (this.characteristic.writeValue) {
           await this.characteristic.writeValue(chunk);
         } else {
@@ -195,7 +195,7 @@ export class BluetoothConnection extends ConnectionInterface {
     this._notifyStateChange('disconnected');
 
     if (this.autoReconnectEnabled) {
-      console.log("[BLE] Unexpected disconnection. Initiating auto-reconnect...");
+      console.log("[BLE] Desconexión inesperada. Iniciando reconexión automática...");
       this.reconnect();
     }
   }

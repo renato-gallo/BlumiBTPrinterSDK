@@ -1,12 +1,12 @@
 import { TicketBuilder } from "./TicketBuilder.js";
 
 /**
- * Courier / Logistics Delivery Slip Builder.
- * Extends TicketBuilder.
+ * Constructor de Plantilla de Vale de Despacho, Envíos y Logística.
+ * Extiende de TicketBuilder.
  */
 export class DeliveryBuilder extends TicketBuilder {
   /**
-   * Appends Courier routing block.
+   * Añade el bloque de cabecera de la empresa de transporte y código de barras.
    */
   deliveryHeader(courierName, trackingId, recipientName) {
     this.center();
@@ -17,7 +17,7 @@ export class DeliveryBuilder extends TicketBuilder {
     this.bold(false);
     this.line();
 
-    // Print Barcode for tracking
+    // Imprimir código de barras nativo para seguimiento
     this.center();
     this.barcode('code128', trackingId, 70, 3, 0, 2);
     this.feed(1);
@@ -30,7 +30,7 @@ export class DeliveryBuilder extends TicketBuilder {
   }
 
   /**
-   * Appends courier route information.
+   * Añade la información de despacho (dirección, ciudad y sector/zona).
    */
   routeInfo(address, city, zoneCode = "") {
     this.text(`DIRECCIÓN: ${address}`);

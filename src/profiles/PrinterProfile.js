@@ -2,15 +2,15 @@ import { concatUint8Arrays } from "../utils/utils.js";
 import { CharsetEncoder } from "../encoding/CharsetEncoder.js";
 
 /**
- * Base Printer Profile. Defines default ESC/POS commands.
- * Specific vendor overrides must extend this class.
+ * Perfil de Impresora Base. Define los comandos ESC/POS por defecto.
+ * Las anulaciones y adaptaciones específicas de fabricantes deben extender esta clase.
  */
 export class PrinterProfile {
   constructor() {
     this.name = "Generic ESC/POS";
-    this.characterWidth = 48; // Default to 80mm standard (48 chars in Font A)
+    this.characterWidth = 48; // Por defecto para estándar de 80mm (48 caracteres en Fuente A)
     
-    // Mapping of standard character sets to printer ESC t codes
+    // Mapeo de tablas de caracteres estándar a códigos numéricos ESC t de la impresora
     this.supportedCodePages = {
       'cp437': 0,
       'cp850': 2,
@@ -30,21 +30,21 @@ export class PrinterProfile {
   }
 
   /**
-   * ESC @ - Initialize printer
+   * ESC @ - Inicializa la impresora.
    */
   initialize() {
     return new Uint8Array([27, 64]);
   }
 
   /**
-   * ESC E n - Bold text
+   * ESC E n - Habilita/Deshabilita texto en negrita.
    */
   bold(enabled) {
     return new Uint8Array([27, 69, enabled ? 1 : 0]);
   }
 
   /**
-   * ESC - n - Underline text (0: Off, 1: 1-dot, 2: 2-dot)
+   * ESC - n - Habilita subrayado (0: Apagado, 1: 1 punto, 2: 2 puntos).
    */
   underline(level) {
     const val = typeof level === 'boolean' ? (level ? 1 : 0) : Math.max(0, Math.min(2, level));
@@ -52,21 +52,21 @@ export class PrinterProfile {
   }
 
   /**
-   * GS B n - Reverse white/black printing mode
+   * GS B n - Habilita/Deshabilita el modo de impresión inversa (blanco sobre negro).
    */
   reverse(enabled) {
     return new Uint8Array([29, 66, enabled ? 1 : 0]);
   }
 
   /**
-   * ESC V n - Rotate text 90 degrees (0: Off, 1: On)
+   * ESC V n - Rota el texto 90 grados (0: Apagado, 1: Encendido).
    */
   rotation(enabled) {
     return new Uint8Array([27, 86, enabled ? 1 : 0]);
   }
 
   /**
-   * ESC a n - Set alignment
+   * ESC a n - Establece la alineación del texto.
    */
   align(position) {
     const alignMap = { 'left': 0, 'center': 1, 'right': 2, 0: 0, 1: 1, 2: 2 };
@@ -75,7 +75,7 @@ export class PrinterProfile {
   }
 
   /**
-   * GS ! n - Set font size (multipliers 1 to 8)
+   * GS ! n - Establece el tamaño de la fuente (multiplicadores de 1 a 8).
    */
   fontSize(width = 1, height = 1) {
     const w = Math.max(1, Math.min(8, width)) - 1;
@@ -85,7 +85,7 @@ export class PrinterProfile {
   }
 
   /**
-   * ESC d n - Feed paper by n lines
+   * ESC d n - Alimenta el papel n líneas.
    */
   feed(lines = 1) {
     const n = Math.max(1, Math.min(255, lines));
@@ -93,28 +93,28 @@ export class PrinterProfile {
   }
 
   /**
-   * GS V A n - Cut paper (partial or full)
+   * GS V A n - Corta el papel (parcial o total).
    */
   cut(partial = false) {
-    // 65: Full cut, 66: Partial cut (standard GS V A m commands)
+    // 65: Corte completo, 66: Corte parcial (comandos estándar GS V A m)
     const m = partial ? 66 : 65;
     return new Uint8Array([29, 86, m, 0]);
   }
 
   /**
-   * ESC t n - Select code table
+   * ESC t n - Selecciona la tabla de caracteres.
    */
   setCodePage(charset) {
     const code = this.supportedCodePages[charset.toLowerCase()];
     if (code === undefined) {
-      console.warn(`Charset ${charset} not supported natively by this profile. Defaulting to CP850.`);
-      return new Uint8Array([27, 116, 2]); // fallback to CP850
+      console.warn(`La codificación ${charset} no está soportada nativamente por este perfil. Usando CP850 por defecto.`);
+      return new Uint8Array([27, 116, 2]); // respaldo a CP850
     }
     return new Uint8Array([27, 116, code]);
   }
 
   /**
-   * ESC p m t1 t2 - Kick cash drawer (0: Pin 2, 1: Pin 5)
+   * ESC p m t1 t2 - Abre el cajón portamonedas (0: Pin 2, 1: Pin 5).
    */
   cashDrawer(pin = 0) {
     const m = pin === 1 ? 1 : 0;
@@ -122,7 +122,7 @@ export class PrinterProfile {
   }
 
   /**
-   * GS ( k - Native QR Code printing (Model 2)
+   * GS ( k - Impresión nativa de Código QR (Modelo 2).
    */
   qr(data, size = 6, errorCorrection = 'M') {
     const dataBytes = CharsetEncoder.encode(data, 'cp850');
@@ -146,7 +146,7 @@ export class PrinterProfile {
   }
 
   /**
-   * GS k m n d1...dn - Print 1D Barcode (Format B)
+   * GS k m n d1...dn - Imprime un código de barras 1D (Formato B).
    */
   barcode(type, data, height = 80, width = 3, font = 0, position = 2) {
     const typeMap = {
@@ -163,27 +163,27 @@ export class PrinterProfile {
 
     const system = typeMap[type.toLowerCase()];
     if (system === undefined) {
-      throw new Error(`Barcode type '${type}' is not supported by standard ESC/POS.`);
+      throw new Error(`El tipo de código de barras '${type}' no está soportado por el estándar ESC/POS.`);
     }
 
     let dataBytes = CharsetEncoder.encode(data, 'cp850');
     
-    // Code128 requires charset identifier prefix. Default to Subset B '{B'
+    // Code128 requiere el prefijo identificador de subconjunto. Por defecto Subconjunto B '{B'
     if (system === 73) {
       const hasSubsetPrefix = data.startsWith('{A') || data.startsWith('{B') || data.startsWith('{C');
       if (!hasSubsetPrefix) {
-        const prefix = new Uint8Array([123, 66]); // '{B' in ASCII
+        const prefix = new Uint8Array([123, 66]); // '{B' en ASCII
         dataBytes = concatUint8Arrays([prefix, dataBytes]);
       }
     }
 
-    // Dimension commands
+    // Comandos de dimensionamiento
     const heightCmd = new Uint8Array([29, 104, Math.max(1, Math.min(255, height))]);
     const widthCmd = new Uint8Array([29, 119, Math.max(2, Math.min(6, width))]);
     const fontCmd = new Uint8Array([29, 102, font === 1 ? 1 : 0]);
     const posCmd = new Uint8Array([29, 72, Math.max(0, Math.min(3, position))]);
 
-    // Format 2 Barcode print command: GS k m n d1...dn
+    // Comando de impresión de formato 2: GS k m n d1...dn
     const header = new Uint8Array([29, 107, system, dataBytes.length]);
     const printCmd = concatUint8Arrays([header, dataBytes]);
 
@@ -191,13 +191,13 @@ export class PrinterProfile {
   }
 
   /**
-   * GS ( k - Native PDF417 (Standard ESC/POS Function Group)
+   * GS ( k - PDF417 Nativo (Grupo de funciones estándar ESC/POS).
    */
   pdf417(data, options = {}) {
     const cols = options.columns || 0; // 0: Auto
     const rows = options.rows || 0;       // 0: Auto
-    const width = options.width || 3;    // Module width
-    const height = options.height || 3;  // Module height ratio
+    const width = options.width || 3;    // Ancho de módulo
+    const height = options.height || 3;  // Relación de alto de módulo
     const errorLevel = options.errorLevel || 1;
 
     const dataBytes = CharsetEncoder.encode(data, 'cp850');
@@ -205,22 +205,22 @@ export class PrinterProfile {
     const pL = numBytes & 0xFF;
     const pH = (numBytes >> 8) & 0xFF;
 
-    // Set Columns (fn 041)
+    // Ajustar columnas (fn 041)
     const colsCmd = new Uint8Array([29, 40, 107, 3, 0, 48, 65, cols]);
-    // Set Rows (fn 042)
+    // Ajustar filas (fn 042)
     const rowsCmd = new Uint8Array([29, 40, 107, 3, 0, 48, 66, rows]);
-    // Set Width (fn 043)
+    // Ajustar ancho (fn 043)
     const widthCmd = new Uint8Array([29, 40, 107, 3, 0, 48, 67, width]);
-    // Set Height (fn 044)
+    // Ajustar alto (fn 044)
     const heightCmd = new Uint8Array([29, 40, 107, 3, 0, 48, 68, height]);
-    // Set Error Correction (fn 045)
+    // Ajustar nivel de corrección de errores (fn 045)
     const errCmd = new Uint8Array([29, 40, 107, 4, 0, 48, 69, 48, errorLevel]);
 
-    // Store PDF417 data (fn 080)
+    // Guardar datos PDF417 (fn 080)
     const storeHeader = new Uint8Array([29, 40, 107, pL, pH, 48, 80, 48]);
     const storeCmd = concatUint8Arrays([storeHeader, dataBytes]);
 
-    // Print PDF417 symbol (fn 081)
+    // Imprimir símbolo PDF417 (fn 081)
     const printCmd = new Uint8Array([29, 40, 107, 3, 0, 48, 81, 48]);
 
     return concatUint8Arrays([colsCmd, rowsCmd, widthCmd, heightCmd, errCmd, storeCmd, printCmd]);

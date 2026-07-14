@@ -1,12 +1,12 @@
 import { TicketBuilder } from "./TicketBuilder.js";
 
 /**
- * Standard Receipt Template Builder.
- * Extends TicketBuilder to offer specialized business semantic methods.
+ * Constructor de Plantilla de Boleta/Recibo Estándar.
+ * Extiende de TicketBuilder para ofrecer métodos semánticos especializados para comercio.
  */
 export class ReceiptBuilder extends TicketBuilder {
   /**
-   * Appends header block.
+   * Añade el bloque de cabecera de la boleta.
    */
   receiptHeader(title, subtitle = "", address = "") {
     this.center();
@@ -21,7 +21,7 @@ export class ReceiptBuilder extends TicketBuilder {
   }
 
   /**
-   * Appends item rows.
+   * Añade una fila de producto/servicio.
    */
   item(name, qty, price) {
     const total = qty * price;
@@ -32,7 +32,7 @@ export class ReceiptBuilder extends TicketBuilder {
   }
 
   /**
-   * Appends payment summaries.
+   * Añade el desglose del resumen de totales.
    */
   summary(subtotal, tax, total) {
     this.line();
@@ -45,7 +45,7 @@ export class ReceiptBuilder extends TicketBuilder {
   }
 
   /**
-   * Appends centered footer text.
+   * Añade el texto de pie de página centrado.
    */
   footer(msg) {
     this.feed(1);

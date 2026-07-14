@@ -1,12 +1,12 @@
 import { TicketBuilder } from "./TicketBuilder.js";
 
 /**
- * High-visibility Kitchen Order Builder.
- * Extends TicketBuilder.
+ * Constructor de Plantilla de Comanda de Cocina de alta visibilidad.
+ * Extiende de TicketBuilder.
  */
 export class KitchenBuilder extends TicketBuilder {
   /**
-   * Appends large order identifier.
+   * Añade el bloque de cabecera con el número de pedido en tamaño grande.
    */
   kitchenHeader(orderNum, table = "", time = "") {
     this.center();
@@ -30,7 +30,7 @@ export class KitchenBuilder extends TicketBuilder {
   }
 
   /**
-   * Appends kitchen item with double size quantity for clear picking.
+   * Añade un plato o producto a preparar a la comanda.
    */
   addKitchenItem(name, qty, modifiers = []) {
     this.bold(true);
@@ -45,7 +45,7 @@ export class KitchenBuilder extends TicketBuilder {
   }
 
   /**
-   * Appends critical comments in negative block.
+   * Añade advertencias críticas (alérgenos, notas de cliente) en un bloque invertido destacado.
    */
   attention(text) {
     this.center();

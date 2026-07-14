@@ -1,15 +1,15 @@
 import { TicketBuilder } from "./TicketBuilder.js";
 
 /**
- * Standard Invoice Template Builder.
- * Extends TicketBuilder.
+ * Constructor de Plantilla de Factura Estándar.
+ * Extiende de TicketBuilder.
  */
 export class InvoiceBuilder extends TicketBuilder {
   /**
-   * Appends structured company and customer header details.
+   * Añade el bloque estructurado de cabecera con detalles de la empresa emisora y el cliente.
    * 
-   * @param {Object} company - Company metadata ({ name, rut, address }).
-   * @param {Object} customer - Customer metadata ({ name, rut, address }).
+   * @param {Object} company - Metadatos de la empresa ({ name, rut, address }).
+   * @param {Object} customer - Metadatos del cliente ({ name, rut, address }).
    * @returns {InvoiceBuilder}
    */
   invoiceHeader(company, customer) {
@@ -35,7 +35,7 @@ export class InvoiceBuilder extends TicketBuilder {
   }
 
   /**
-   * Appends billable item row.
+   * Añade una fila de producto/servicio facturable.
    */
   itemRow(name, qty, unitPrice) {
     const total = qty * unitPrice;
@@ -46,7 +46,7 @@ export class InvoiceBuilder extends TicketBuilder {
   }
 
   /**
-   * Appends taxation grid.
+   * Añade el bloque de desglose impositivo (Neto, IVA, Total).
    */
   taxBlock(net, vat, total) {
     this.line('-');

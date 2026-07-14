@@ -1,8 +1,8 @@
 import { PrinterProfile } from "./PrinterProfile.js";
 
 /**
- * GPrinter Profile.
- * Extends PrinterProfile.
+ * Perfil de impresora GPrinter Estándar ESC/POS.
+ * Extiende de PrinterProfile.
  */
 export class GPrinterProfile extends PrinterProfile {
   constructor() {

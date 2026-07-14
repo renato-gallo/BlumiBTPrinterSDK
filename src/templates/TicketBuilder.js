@@ -3,15 +3,15 @@ import { concatUint8Arrays, loadImage } from "../utils/utils.js";
 import { ImageProcessor } from "../images/ImageProcessor.js";
 
 /**
- * Base Ticket/Receipt Builder.
- * Exposes chainable design layout methods compiling into a single ESC/POS Uint8Array.
+ * Constructor de Plantilla de Boleta/Ticket Base.
+ * Expone métodos encadenables de diseño y diagramación de comprobantes de impresión.
  */
 export class TicketBuilder {
   /**
-   * @param {Object} [options={}] - Config parameters.
-   * @param {number} [options.characterWidth=48] - Column characters limit.
-   * @param {string} [options.charset='cp850'] - Active code page.
-   * @param {EscPosEncoder} [options.encoder] - Pre-instantiated command encoder.
+   * @param {Object} [options={}] - Parámetros de configuración.
+   * @param {number} [options.characterWidth=48] - Límite de caracteres por columna.
+   * @param {string} [options.charset='cp850'] - Tabla de caracteres activa.
+   * @param {EscPosEncoder} [options.encoder] - Instancia predefinida del compilador de comandos.
    */
   constructor(options = {}) {
     this.characterWidth = options.characterWidth || 48;
@@ -19,14 +19,14 @@ export class TicketBuilder {
     this.encoder = options.encoder || new EscPosEncoder();
     this.buffers = [];
 
-    // Prepend default initialization
+    // Anteponer inicialización por defecto
     this.buffers.push(this.encoder.initialize());
     this.buffers.push(this.encoder.setCodePage(this.charset));
   }
 
   /**
-   * Appends text with a trailing newline.
-   * @param {string} string
+   * Añade una línea de texto plano finalizada con un salto de línea.
+   * @param {string} string - Texto plano.
    * @returns {TicketBuilder}
    */
   text(string) {
@@ -36,7 +36,7 @@ export class TicketBuilder {
   }
 
   /**
-   * Toggles bold mode.
+   * Alterna la impresión de texto en negrita.
    * @param {boolean} [enabled=true]
    * @returns {TicketBuilder}
    */
@@ -46,7 +46,7 @@ export class TicketBuilder {
   }
 
   /**
-   * Toggles underline decoration.
+   * Alterna la decoración de subrayado.
    * @param {boolean|number} [level=true]
    * @returns {TicketBuilder}
    */
@@ -56,7 +56,7 @@ export class TicketBuilder {
   }
 
   /**
-   * Toggles negative print mode.
+   * Alterna la impresión en modo inverso (blanco sobre negro).
    * @param {boolean} [enabled=true]
    * @returns {TicketBuilder}
    */
@@ -66,7 +66,7 @@ export class TicketBuilder {
   }
 
   /**
-   * Toggles 90-degree character rotation.
+   * Alterna la rotación de caracteres en 90 grados.
    * @param {boolean} [enabled=true]
    * @returns {TicketBuilder}
    */
@@ -76,7 +76,7 @@ export class TicketBuilder {
   }
 
   /**
-   * Sets text alignment.
+   * Establece la alineación del texto.
    * @param {string|number} pos - 'left', 'center', 'right'.
    * @returns {TicketBuilder}
    */
@@ -86,7 +86,7 @@ export class TicketBuilder {
   }
 
   /**
-   * Centers text.
+   * Centra la alineación.
    * @returns {TicketBuilder}
    */
   center() {
@@ -94,7 +94,7 @@ export class TicketBuilder {
   }
 
   /**
-   * Left-aligns text.
+   * Alinea a la izquierda.
    * @returns {TicketBuilder}
    */
   left() {
@@ -102,7 +102,7 @@ export class TicketBuilder {
   }
 
   /**
-   * Right-aligns text.
+   * Alinea a la derecha.
    * @returns {TicketBuilder}
    */
   right() {
@@ -110,9 +110,9 @@ export class TicketBuilder {
   }
 
   /**
-   * Modifies font size multipliers.
-   * @param {number} width
-   * @param {number} height
+   * Modifica la escala de tamaño de la fuente.
+   * @param {number} width - Multiplicador horizontal (1-8).
+   * @param {number} height - Multiplicador vertical (1-8).
    * @returns {TicketBuilder}
    */
   size(width, height) {
@@ -121,7 +121,7 @@ export class TicketBuilder {
   }
 
   /**
-   * Appends separator line.
+   * Añade una línea horizontal de separación de caracteres.
    * @param {string} [char='-']
    * @returns {TicketBuilder}
    */
@@ -132,9 +132,9 @@ export class TicketBuilder {
   }
 
   /**
-   * Prints double-column key/value row.
-   * @param {string} left
-   * @param {string} right
+   * Imprime una fila con dos columnas alineadas a los extremos izquierdo/derecho.
+   * @param {string} left - Contenido izquierdo.
+   * @param {string} right - Contenido derecho.
    * @returns {TicketBuilder}
    */
   row(left, right) {
@@ -155,8 +155,8 @@ export class TicketBuilder {
   }
 
   /**
-   * Highlights totals with double separator lines.
-   * @param {string} value
+   * Destaca totales de la boleta rodeándolos de líneas dobles.
+   * @param {string} value - Monto total formateado.
    * @returns {TicketBuilder}
    */
   total(value) {
@@ -169,10 +169,10 @@ export class TicketBuilder {
   }
 
   /**
-   * Embeds centered native QR code.
-   * @param {string} url
-   * @param {number} [size=6]
-   * @param {string} [ec='M']
+   * Añade un código QR centrado de forma nativa.
+   * @param {string} url - Contenido del QR.
+   * @param {number} [size=6] - Escala.
+   * @param {string} [ec='M'] - Nivel de corrección de errores (L, M, Q, H).
    * @returns {TicketBuilder}
    */
   qr(url, size = 6, ec = 'M') {
@@ -184,7 +184,7 @@ export class TicketBuilder {
   }
 
   /**
-   * Embeds native 1D barcode.
+   * Añade un código de barras 1D nativo.
    * @returns {TicketBuilder}
    */
   barcode(type, data, height = 80, width = 3, font = 0, position = 2) {
@@ -193,7 +193,7 @@ export class TicketBuilder {
   }
 
   /**
-   * Embeds native 2D PDF417 barcode.
+   * Añade un código de barras 2D PDF417 nativo.
    * @returns {TicketBuilder}
    */
   pdf417(data, options = {}) {
@@ -202,7 +202,7 @@ export class TicketBuilder {
   }
 
   /**
-   * Triggers cash drawer.
+   * Envía la señal de apertura de cajón portamonedas.
    * @param {number} [pin=0]
    * @returns {TicketBuilder}
    */
@@ -212,7 +212,7 @@ export class TicketBuilder {
   }
 
   /**
-   * Rasterizes and embeds image into command stream (asynchronous).
+   * Rasteriza e inserta una imagen en comandos raster (asíncrono).
    * 
    * @param {string|Blob|File|HTMLImageElement} src
    * @param {Object} [options={}]
@@ -238,13 +238,13 @@ export class TicketBuilder {
       this.feed(1);
       this.left();
     } catch (err) {
-      console.error("[TicketBuilder] Image render failed:", err);
+      console.error("[TicketBuilder] Falló la renderización de la imagen:", err);
     }
     return this;
   }
 
   /**
-   * Feeds paper by lines.
+   * Avanza el papel por líneas.
    * @param {number} [lines=1]
    * @returns {TicketBuilder}
    */
@@ -254,7 +254,7 @@ export class TicketBuilder {
   }
 
   /**
-   * Cuts paper.
+   * Realiza un corte físico de papel.
    * @param {boolean} [partial=false]
    * @returns {TicketBuilder}
    */
@@ -264,7 +264,7 @@ export class TicketBuilder {
   }
 
   /**
-   * Compiles the buffers.
+   * Compila los búferes y retorna la secuencia binaria completa.
    * @returns {Uint8Array}
    */
   build() {

@@ -4,15 +4,15 @@ import { ImageProcessor } from "../images/ImageProcessor.js";
 import { concatUint8Arrays } from "../utils/utils.js";
 
 /**
- * ESC/POS Byte Command Compiler.
- * Translates formatting operations into a raw binary command stream (Uint8Array)
- * by delegating brand-specific quirks to the active PrinterProfile.
+ * Compilador de Comandos en Bytes ESC/POS.
+ * Traduce operaciones de formato en un flujo de comandos binarios (Uint8Array)
+ * delegando las particularidades de marcas de impresoras al PrinterProfile activo.
  */
 export class EscPosEncoder {
   /**
-   * @param {PrinterProfile} [profile] - The active printer hardware profile.
-   * @param {Object} [options={}] - Compiler options.
-   * @param {boolean} [options.sanitizeSpanish=false] - Normalize Spanish characters to 7-bit ASCII.
+   * @param {PrinterProfile} [profile] - Perfil de hardware de la impresora activa.
+   * @param {Object} [options={}] - Opciones de compilación.
+   * @param {boolean} [options.sanitizeSpanish=false] - Normaliza caracteres del español a ASCII de 7 bits.
    */
   constructor(profile = new EpsonProfile(), options = {}) {
     this.profile = profile;
@@ -20,7 +20,7 @@ export class EscPosEncoder {
   }
 
   /**
-   * Delegates initialization command sequence.
+   * Delega la secuencia de comandos de inicialización de la impresora.
    * @returns {Uint8Array}
    */
   initialize() {
@@ -28,7 +28,7 @@ export class EscPosEncoder {
   }
 
   /**
-   * Delegates bold toggling.
+   * Delega la activación/desactivación del modo negrita.
    * @param {boolean} enabled
    * @returns {Uint8Array}
    */
@@ -37,8 +37,8 @@ export class EscPosEncoder {
   }
 
   /**
-   * Delegates underline level setting.
-   * @param {boolean|number} level - Underline state or line thickness index (0-2).
+   * Delega el ajuste del nivel de subrayado.
+   * @param {boolean|number} level - Estado o grosor de la línea (0-2).
    * @returns {Uint8Array}
    */
   underline(level) {
@@ -46,7 +46,7 @@ export class EscPosEncoder {
   }
 
   /**
-   * Delegates negative/reverse mode setting.
+   * Delega la activación/desactivación del modo inverso (blanco sobre negro).
    * @param {boolean} enabled
    * @returns {Uint8Array}
    */
@@ -55,7 +55,7 @@ export class EscPosEncoder {
   }
 
   /**
-   * Delegates 90-degree character rotation setting.
+   * Delega la rotación del texto en 90 grados.
    * @param {boolean} enabled
    * @returns {Uint8Array}
    */
@@ -64,7 +64,7 @@ export class EscPosEncoder {
   }
 
   /**
-   * Delegates text alignment setting.
+   * Delega la alineación del texto.
    * @param {string|number} position - 'left', 'center', 'right'.
    * @returns {Uint8Array}
    */
@@ -73,9 +73,9 @@ export class EscPosEncoder {
   }
 
   /**
-   * Delegates character scaling setting.
-   * @param {number} width - Horizontal scale (1-8).
-   * @param {number} height - Vertical scale (1-8).
+   * Delega la escala de tamaño de fuente.
+   * @param {number} width - Escala horizontal (1-8).
+   * @param {number} height - Escala vertical (1-8).
    * @returns {Uint8Array}
    */
   fontSize(width, height) {
@@ -83,8 +83,8 @@ export class EscPosEncoder {
   }
 
   /**
-   * Delegates page feed setting.
-   * @param {number} lines - Number of lines.
+   * Delega el avance de papel por líneas.
+   * @param {number} lines - Número de líneas.
    * @returns {Uint8Array}
    */
   feed(lines) {
@@ -92,8 +92,8 @@ export class EscPosEncoder {
   }
 
   /**
-   * Delegates cutting command sequence.
-   * @param {boolean} [partial=false] - True for partial cut if supported.
+   * Delega la secuencia de comandos de corte.
+   * @param {boolean} [partial=false] - True para realizar un corte parcial si está soportado.
    * @returns {Uint8Array}
    */
   cut(partial = false) {
@@ -101,7 +101,7 @@ export class EscPosEncoder {
   }
 
   /**
-   * Delegates selection of active printer code table.
+   * Delega la selección de la tabla de caracteres activa en la impresora.
    * @param {string} charset
    * @returns {Uint8Array}
    */
@@ -110,18 +110,18 @@ export class EscPosEncoder {
   }
 
   /**
-   * Compiles text. If charset is 'utf-8' and the profile lacks native support,
-   * it falls back to rendering text onto offscreen canvases (raster fallback).
+   * Compila el texto. Si la codificación es 'utf-8' y el perfil carece de soporte nativo,
+   * utiliza el renderizado de texto mediante lienzo virtual (respaldo rasterizado).
    * 
-   * @param {string} string - Plain text.
-   * @param {string} [charset='cp850'] - Active character set.
+   * @param {string} string - Texto plano.
+   * @param {string} [charset='cp850'] - Tabla de caracteres activa.
    * @returns {Uint8Array}
    */
   text(string, charset = 'cp850') {
     const processed = this.sanitizeSpanish ? CharsetEncoder.normalizeSpanish(string) : string;
     const target = charset.toLowerCase();
     
-    // Check if printer has native UTF-8 support; otherwise, trigger raster fallback
+    // Si la impresora no soporta UTF-8 nativo, activa el respaldo rasterizado
     if (target === 'utf-8' && !this.profile.supportedCodePages['utf-8']) {
       const raster = ImageProcessor.rasterizeText(processed, {
         characterWidth: this.profile.characterWidth
@@ -133,7 +133,7 @@ export class EscPosEncoder {
   }
 
   /**
-   * Delegates native QR code generation.
+   * Delega la generación del código QR nativo.
    * @param {string} data
    * @param {number} [size=6]
    * @param {string} [ec='M']
@@ -144,7 +144,7 @@ export class EscPosEncoder {
   }
 
   /**
-   * Delegates native 1D barcode generation.
+   * Delega la generación de código de barras 1D nativo.
    * @returns {Uint8Array}
    */
   barcode(type, data, height = 80, width = 3, font = 0, position = 2) {
@@ -152,7 +152,7 @@ export class EscPosEncoder {
   }
 
   /**
-   * Delegates native 2D PDF417 barcode generation.
+   * Delega la generación de código de barras PDF417 nativo de 2D.
    * @returns {Uint8Array}
    */
   pdf417(data, options = {}) {
@@ -160,7 +160,7 @@ export class EscPosEncoder {
   }
 
   /**
-   * Delegates cash drawer trigger sequence.
+   * Delega la secuencia de apertura del cajón portamonedas.
    * @returns {Uint8Array}
    */
   cashDrawer(pin = 0) {
@@ -168,11 +168,11 @@ export class EscPosEncoder {
   }
 
   /**
-   * Compiles monochrome bitmap into standard GS v 0 raster command.
+   * Compila una imagen de mapa de bits monocromática en comandos raster estándar GS v 0.
    * 
-   * @param {number} width - Image width (pixels).
-   * @param {number} height - Image height (pixels).
-   * @param {Uint8Array} bytes - Packed binary data.
+   * @param {number} width - Ancho de la imagen (píxeles).
+   * @param {number} height - Alto de la imagen (píxeles).
+   * @param {Uint8Array} bytes - Datos binarios compactados.
    * @returns {Uint8Array}
    */
   rasterImage(width, height, bytes) {

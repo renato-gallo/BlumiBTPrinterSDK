@@ -1,6 +1,6 @@
 /**
- * Abstract connection interface that defines connection drivers.
- * All connection modules (Bluetooth, USB, Serial) must implement this interface.
+ * Interfaz de conexión abstracta que define los controladores de comunicación.
+ * Todos los módulos de conexión (Bluetooth, USB, Serial) deben implementar esta interfaz.
  * 
  * @interface
  */
@@ -8,44 +8,44 @@ export class ConnectionInterface extends EventTarget {
   constructor() {
     super();
     if (this.constructor === ConnectionInterface) {
-      throw new Error("ConnectionInterface is abstract and cannot be instantiated directly.");
+      throw new Error("ConnectionInterface es una clase abstracta y no puede ser instanciada directamente.");
     }
   }
 
   /**
-   * Establish the device connection.
+   * Establece la conexión con el dispositivo.
    * @abstract
    * @returns {Promise<boolean>}
    */
   async connect() {
-    throw new Error("Method 'connect()' must be implemented.");
+    throw new Error("El método 'connect()' debe ser implementado.");
   }
 
   /**
-   * Sever the device connection.
+   * Cierra la conexión con el dispositivo.
    * @abstract
    * @returns {Promise<void>}
    */
   async disconnect() {
-    throw new Error("Method 'disconnect()' must be implemented.");
+    throw new Error("El método 'disconnect()' debe ser implementado.");
   }
 
   /**
-   * Dispatch byte data to the connection target.
+   * Envía datos binarios al destino de conexión.
    * @abstract
-   * @param {Uint8Array} bytes - Array of commands.
+   * @param {Uint8Array} bytes - Arreglo de comandos binarios.
    * @returns {Promise<void>}
    */
   async send(bytes) {
-    throw new Error("Method 'send()' must be implemented.");
+    throw new Error("El método 'send()' debe ser implementado.");
   }
 
   /**
-   * Verify the active connection status.
+   * Verifica el estado activo de la conexión.
    * @abstract
    * @returns {boolean}
    */
   isConnected() {
-    throw new Error("Method 'isConnected()' must be implemented.");
+    throw new Error("El método 'isConnected()' debe ser implementado.");
   }
 }

@@ -1,8 +1,8 @@
 /**
- * Concatenates multiple Uint8Array buffers into a single Uint8Array.
+ * Concatena múltiples búferes de tipo Uint8Array en un único Uint8Array continuo.
  * 
- * @param {Uint8Array[]} arrays - Array of Uint8Arrays to concatenate.
- * @returns {Uint8Array} The combined byte array.
+ * @param {Uint8Array[]} arrays - Arreglo de instancias de Uint8Array a concatenar.
+ * @returns {Uint8Array} El arreglo de bytes combinado resultante.
  */
 export function concatUint8Arrays(arrays) {
   let totalLength = 0;
@@ -22,10 +22,10 @@ export function concatUint8Arrays(arrays) {
 }
 
 /**
- * Dynamically loads an image from a URL, Blob, File, or HTMLImageElement.
+ * Carga dinámicamente una imagen a partir de una URL, Blob, File o HTMLImageElement.
  * 
- * @param {string|Blob|File|HTMLImageElement} src - The source of the image.
- * @returns {Promise<HTMLImageElement>} A promise resolving to the loaded HTMLImageElement.
+ * @param {string|Blob|File|HTMLImageElement} src - El origen de la imagen a cargar.
+ * @returns {Promise<HTMLImageElement>} Promesa que resuelve al elemento HTMLImageElement cargado.
  */
 export function loadImage(src) {
   return new Promise((resolve, reject) => {
@@ -40,7 +40,7 @@ export function loadImage(src) {
     }
 
     const img = new Image();
-    img.crossOrigin = 'anonymous'; // Prevent tainted canvas for external URLs
+    img.crossOrigin = 'anonymous'; // Previene bloqueos CORS en el canvas para URLs externas
 
     img.onload = () => {
       if (src instanceof Blob) {
@@ -53,7 +53,7 @@ export function loadImage(src) {
       if (src instanceof Blob) {
         URL.revokeObjectURL(img.src);
       }
-      reject(new Error("Failed to load image source."));
+      reject(new Error("No se pudo cargar el origen de la imagen."));
     };
 
     if (src instanceof Blob) {
@@ -61,7 +61,7 @@ export function loadImage(src) {
     } else if (typeof src === 'string') {
       img.src = src;
     } else {
-      reject(new Error("Unsupported image source type."));
+      reject(new Error("Tipo de origen de imagen no soportado."));
     }
   });
 }

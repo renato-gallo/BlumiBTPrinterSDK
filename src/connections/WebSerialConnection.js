@@ -1,8 +1,8 @@
 import { ConnectionInterface } from "./ConnectionInterface.js";
 
 /**
- * Connection driver for Web Serial COM thermal printers (Roadmap Stub).
- * Extends ConnectionInterface.
+ * Controlador de conexión para impresoras térmicas mediante puerto Serie Web COM (Borrador del Roadmap).
+ * Extiende de ConnectionInterface.
  */
 export class WebSerialConnection extends ConnectionInterface {
   constructor() {
@@ -16,7 +16,7 @@ export class WebSerialConnection extends ConnectionInterface {
   }
 
   async connect() {
-    throw new Error("Web Serial Connection is planned for v2.2.0 and is not yet implemented.");
+    throw new Error("La conexión Web Serial está planificada para la versión v2.2.0 y aún no ha sido implementada.");
   }
 
   async disconnect() {
@@ -25,6 +25,6 @@ export class WebSerialConnection extends ConnectionInterface {
   }
 
   async send(bytes) {
-    throw new Error("Web Serial Connection is inactive.");
+    throw new Error("La conexión Web Serial se encuentra inactiva.");
   }
 }

@@ -6,20 +6,23 @@ import { TicketBuilder } from "../templates/TicketBuilder.js";
 import { InvoiceBuilder } from "../templates/InvoiceBuilder.js";
 import { KitchenBuilder } from "../templates/KitchenBuilder.js";
 import { DeliveryBuilder } from "../templates/DeliveryBuilder.js";
+import { ReceiptBuilder } from "../templates/ReceiptBuilder.js";
+import { OpenFacturaBuilder } from "../templates/OpenFacturaBuilder.js";
+import { SiiReceiptBuilder } from "../templates/SiiReceiptBuilder.js";
 import { concatUint8Arrays, loadImage } from "../utils/utils.js";
 import { ImageProcessor } from "../images/ImageProcessor.js";
 
 /**
- * Core orchestrator of the BLUMI Printer SDK.
- * Manages connections, physical hardware profiles, job queueing, and document builders.
+ * Orquestador principal del BLUMI Printer SDK.
+ * Administra conexiones, perfiles físicos de hardware, cola de tareas y constructores de documentos.
  */
 export class BlumiPrinter {
   /**
-   * @param {Object} [options={}] - Orchestrator configurations.
-   * @param {PrinterProfile} [options.profile] - Active printer hardware profile. Defaults to EpsonProfile.
-   * @param {ConnectionInterface} [options.connection] - Connection backend driver. Defaults to BluetoothConnection.
-   * @param {number} [options.characterWidth] - Text columns width override. Defaults to profile standard (48).
-   * @param {string} [options.charset='cp850'] - Target character code page encoding.
+   * @param {Object} [options={}] - Configuraciones del orquestador.
+   * @param {PrinterProfile} [options.profile] - Perfil de hardware de la impresora activa. Por defecto EpsonProfile.
+   * @param {ConnectionInterface} [options.connection] - Controlador de conexión físico. Por defecto BluetoothConnection.
+   * @param {number} [options.characterWidth] - Anulación del ancho de columnas en caracteres. Por defecto el estándar del perfil (48).
+   * @param {string} [options.charset='cp850'] - Tabla de códigos de caracteres de destino.
    */
   constructor(options = {}) {
     this.profile = options.profile || new EpsonProfile();
@@ -28,7 +31,7 @@ export class BlumiPrinter {
     this.charset = options.charset || 'cp850';
     this.sanitizeSpanish = options.sanitizeSpanish || false;
 
-    // Core utilities
+    // Utilidades del núcleo
     this.encoder = new EscPosEncoder(this.profile, { sanitizeSpanish: this.sanitizeSpanish });
     this.queue = new PrinterQueue();
 
@@ -37,7 +40,7 @@ export class BlumiPrinter {
   }
 
   /**
-   * Clears the direct printing buffer and appends initialization headers.
+   * Limpia el búfer directo de comandos y añade los encabezados de inicialización.
    * @private
    */
   _resetBuffer() {
@@ -48,15 +51,15 @@ export class BlumiPrinter {
   }
 
   /**
-   * Establishes active device connection via connection driver.
-   * @returns {Promise<boolean>} Resolves to true if successfully connected.
+   * Establece la conexión física con el dispositivo mediante el controlador.
+   * @returns {Promise<boolean>} Devuelve true si la conexión es exitosa.
    */
   async connect() {
     return await this.connection.connect();
   }
 
   /**
-   * Closes active connection.
+   * Cierra la conexión activa actual.
    * @returns {Promise<void>}
    */
   async disconnect() {
@@ -65,7 +68,7 @@ export class BlumiPrinter {
   }
 
   /**
-   * Attempts connection recovery.
+   * Intenta recuperar o restablecer la conexión activa.
    * @returns {Promise<boolean>}
    */
   async reconnect() {
@@ -73,7 +76,7 @@ export class BlumiPrinter {
   }
 
   /**
-   * Retrieves active connection details.
+   * Retorna los detalles y estado del canal de conexión actual.
    * @returns {Object}
    */
   status() {
@@ -86,11 +89,11 @@ export class BlumiPrinter {
     };
   }
 
-  // Chaining API
+  // API de Encadenamiento Directo (Chaining)
 
   /**
-   * Appends text to direct buffer.
-   * @param {string} string - Plain text.
+   * Añade texto plano al búfer de impresión directa.
+   * @param {string} string - Texto plano a añadir.
    * @returns {BlumiPrinter}
    */
   text(string) {
@@ -100,7 +103,7 @@ export class BlumiPrinter {
   }
 
   /**
-   * Toggles bold printing in direct buffer.
+   * Alterna la impresión en negrita en el búfer directo.
    * @param {boolean} [enabled=true]
    * @returns {BlumiPrinter}
    */
@@ -110,8 +113,8 @@ export class BlumiPrinter {
   }
 
   /**
-   * Sets underline style in direct buffer.
-   * @param {boolean|number} [level=true] - State or stroke thickness.
+   * Ajusta el estilo de subrayado en el búfer directo.
+   * @param {boolean|number} [level=true] - Nivel de subrayado o grosor (0-2).
    * @returns {BlumiPrinter}
    */
   underline(level = true) {
@@ -120,7 +123,7 @@ export class BlumiPrinter {
   }
 
   /**
-   * Toggles negative print mode in direct buffer.
+   * Alterna el modo inverso (blanco sobre negro) en el búfer directo.
    * @param {boolean} [enabled=true]
    * @returns {BlumiPrinter}
    */
@@ -130,7 +133,7 @@ export class BlumiPrinter {
   }
 
   /**
-   * Toggles 90-degree text rotation in direct buffer.
+   * Alterna la rotación de caracteres en 90 grados en el búfer directo.
    * @param {boolean} [enabled=true]
    * @returns {BlumiPrinter}
    */
@@ -140,8 +143,8 @@ export class BlumiPrinter {
   }
 
   /**
-   * Sets alignment in direct buffer.
-   * @param {string|number} pos - 'left', 'center', 'right'.
+   * Define la alineación en el búfer directo.
+   * @param {string|number} pos - Puede ser 'left', 'center' o 'right'.
    * @returns {BlumiPrinter}
    */
   align(pos) {
@@ -150,7 +153,7 @@ export class BlumiPrinter {
   }
 
   /**
-   * Centers alignment in direct buffer.
+   * Centra la alineación del texto.
    * @returns {BlumiPrinter}
    */
   center() {
@@ -158,7 +161,7 @@ export class BlumiPrinter {
   }
 
   /**
-   * Left-aligns alignment in direct buffer.
+   * Alinea el texto a la izquierda.
    * @returns {BlumiPrinter}
    */
   left() {
@@ -166,7 +169,7 @@ export class BlumiPrinter {
   }
 
   /**
-   * Right-aligns alignment in direct buffer.
+   * Alinea el texto a la derecha.
    * @returns {BlumiPrinter}
    */
   right() {
@@ -174,9 +177,9 @@ export class BlumiPrinter {
   }
 
   /**
-   * Modifies character sizes in direct buffer.
-   * @param {number} width
-   * @param {number} height
+   * Modifica el tamaño de la fuente en el búfer directo.
+   * @param {number} width - Multiplicador de ancho (1-8).
+   * @param {number} height - Multiplicador de alto (1-8).
    * @returns {BlumiPrinter}
    */
   size(width, height) {
@@ -185,7 +188,7 @@ export class BlumiPrinter {
   }
 
   /**
-   * Feeds paper in direct buffer.
+   * Avanza el papel en el búfer directo.
    * @param {number} [lines=1]
    * @returns {BlumiPrinter}
    */
@@ -195,7 +198,7 @@ export class BlumiPrinter {
   }
 
   /**
-   * Cuts paper in direct buffer.
+   * Añade el comando de corte al búfer directo.
    * @param {boolean} [partial=false]
    * @returns {BlumiPrinter}
    */
@@ -205,8 +208,8 @@ export class BlumiPrinter {
   }
 
   /**
-   * Triggers drawer kick in direct buffer.
-   * @param {number} [pin=0] - Drawer pin index (0 for pin 2, 1 for pin 5).
+   * Envía la señal de apertura de cajón en el búfer directo.
+   * @param {number} [pin=0] - Pin del cajón (0 para pin 2, 1 para pin 5).
    * @returns {BlumiPrinter}
    */
   cashDrawer(pin = 0) {
@@ -215,10 +218,10 @@ export class BlumiPrinter {
   }
 
   /**
-   * Embeds a centered native QR code in direct buffer.
-   * @param {string} url - QR payload.
-   * @param {number} [size=6]
-   * @param {string} [ec='M']
+   * Añade un código QR centrado en el búfer directo.
+   * @param {string} url - Contenido del código QR.
+   * @param {number} [size=6] - Escala del código QR.
+   * @param {string} [ec='M'] - Nivel de corrección de errores (L, M, Q, H).
    * @returns {BlumiPrinter}
    */
   qr(url, size = 6, ec = 'M') {
@@ -230,7 +233,7 @@ export class BlumiPrinter {
   }
 
   /**
-   * Embeds a native 1D barcode in direct buffer.
+   * Añade un código de barras 1D en el búfer directo.
    * @returns {BlumiPrinter}
    */
   barcode(type, data, height = 80, width = 3, font = 0, position = 2) {
@@ -239,7 +242,7 @@ export class BlumiPrinter {
   }
 
   /**
-   * Embeds a native 2D PDF417 barcode in direct buffer.
+   * Añade un código de barras PDF417 en el búfer directo.
    * @returns {BlumiPrinter}
    */
   pdf417(data, options = {}) {
@@ -248,10 +251,10 @@ export class BlumiPrinter {
   }
 
   /**
-   * Rasterizes and appends image to direct buffer (asynchronous).
+   * Rasteriza y añade una imagen al búfer directo de impresión (asíncrono).
    * 
-   * @param {string|Blob|File|HTMLImageElement} src - Image source.
-   * @param {Object} [options={}] - Dithering and size configurations.
+   * @param {string|Blob|File|HTMLImageElement} src - Ruta de la imagen o elemento HTMLImageElement.
+   * @param {Object} [options={}] - Opciones de tramado y tamaño.
    * @returns {Promise<BlumiPrinter>}
    */
   async image(src, options = {}) {
@@ -274,14 +277,14 @@ export class BlumiPrinter {
       this.currentBuffer.push(this.encoder.feed(1));
       this.currentBuffer.push(this.encoder.align('left'));
     } catch (err) {
-      console.error("[BlumiPrinter] Image render failed:", err);
+      console.error("[BlumiPrinter] Falló la renderización de la imagen:", err);
     }
     return this;
   }
 
   /**
-   * Submits direct buffer byte stream to serialization queue and clears buffer.
-   * @returns {Promise<any>} Resolves when write finishes.
+   * Despacha el contenido actual del búfer de bytes a la cola de envío física y vacía el búfer.
+   * @returns {Promise<any>} Resoluble al finalizar la escritura.
    */
   async flush() {
     if (this.currentBuffer.length <= 2) {
@@ -294,11 +297,11 @@ export class BlumiPrinter {
     return await this._sendBytes(bytes);
   }
 
-  // Template API
+  // API de Plantillas Predefinidas
 
   /**
-   * Assembles a ticket via TicketBuilder and prints it.
-   * @param {Function} callback - Setup operations on TicketBuilder instance.
+   * Construye un ticket simple mediante TicketBuilder y lo envía a la cola.
+   * @param {Function} callback - Acciones de configuración en la instancia del constructor.
    * @returns {Promise<any>}
    */
   async ticket(callback) {
@@ -312,8 +315,8 @@ export class BlumiPrinter {
   }
 
   /**
-   * Assembles an invoice via InvoiceBuilder and prints it.
-   * @param {Function} callback - Setup operations on InvoiceBuilder instance.
+   * Construye una factura genérica mediante InvoiceBuilder y la envía a la cola.
+   * @param {Function} callback - Acciones de configuración en la instancia del constructor.
    * @returns {Promise<any>}
    */
   async invoice(callback) {
@@ -327,8 +330,8 @@ export class BlumiPrinter {
   }
 
   /**
-   * Assembles a kitchen order ticket via KitchenBuilder and prints it.
-   * @param {Function} callback - Setup operations on KitchenBuilder instance.
+   * Construye una comanda de cocina mediante KitchenBuilder y la envía a la cola.
+   * @param {Function} callback - Acciones de configuración en la instancia del constructor.
    * @returns {Promise<any>}
    */
   async kitchen(callback) {
@@ -342,8 +345,8 @@ export class BlumiPrinter {
   }
 
   /**
-   * Assembles a delivery invoice via DeliveryBuilder and prints it.
-   * @param {Function} callback - Setup operations on DeliveryBuilder instance.
+   * Construye un vale de despacho o entrega mediante DeliveryBuilder y lo envía a la cola.
+   * @param {Function} callback - Acciones de configuración en la instancia del constructor.
    * @returns {Promise<any>}
    */
   async delivery(callback) {
@@ -357,7 +360,52 @@ export class BlumiPrinter {
   }
 
   /**
-   * Schedules byte delivery via connection driver in serialization queue.
+   * Construye una boleta/recibo estándar mediante ReceiptBuilder y la envía a la cola.
+   * @param {Function} callback - Acciones de configuración en la instancia del constructor.
+   * @returns {Promise<any>}
+   */
+  async receipt(callback) {
+    const t = new ReceiptBuilder({
+      characterWidth: this.characterWidth,
+      charset: this.charset,
+      encoder: this.encoder
+    });
+    await callback(t);
+    return await this._sendBytes(t.build());
+  }
+
+  /**
+   * Construye un comprobante compatible con OpenFactura mediante OpenFacturaBuilder y lo envía a la cola.
+   * @param {Function} callback - Acciones de configuración en la instancia del constructor.
+   * @returns {Promise<any>}
+   */
+  async openFactura(callback) {
+    const t = new OpenFacturaBuilder({
+      characterWidth: this.characterWidth,
+      charset: this.charset,
+      encoder: this.encoder
+    });
+    await callback(t);
+    return await this._sendBytes(t.build());
+  }
+
+  /**
+   * Construye una boleta oficial regulada por el SII mediante SiiReceiptBuilder y la envía a la cola.
+   * @param {Function} callback - Acciones de configuración en la instancia del constructor.
+   * @returns {Promise<any>}
+   */
+  async siiReceipt(callback) {
+    const t = new SiiReceiptBuilder({
+      characterWidth: this.characterWidth,
+      charset: this.charset,
+      encoder: this.encoder
+    });
+    await callback(t);
+    return await this._sendBytes(t.build());
+  }
+
+  /**
+   * Encola el envío de bytes al canal físico activo de la impresora.
    * @private
    * @param {Uint8Array} bytes
    * @returns {Promise<any>}
@@ -365,7 +413,7 @@ export class BlumiPrinter {
   _sendBytes(bytes) {
     return this.queue.add(async () => {
       if (!this.connection.isConnected()) {
-        throw new Error("Device is not connected.");
+        throw new Error("El dispositivo de impresión no se encuentra conectado.");
       }
       await this.connection.send(bytes);
     });

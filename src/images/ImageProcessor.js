@@ -1,25 +1,25 @@
 /**
- * Image processing engine for ESC/POS raster conversion.
- * Supports Grayscale, Threshold, Floyd-Steinberg, Atkinson, Ordered Dithering,
- * and text-to-raster UTF-8 fallback rendering.
+ * Motor de procesamiento de imágenes para conversión rasterizada ESC/POS.
+ * Soporta escala de grises, umbralización, tramado Floyd-Steinberg, Atkinson, tramado ordenado Bayer
+ * y renderizado de texto a rasterizado de respaldo para UTF-8.
  */
 export class ImageProcessor {
   /**
-   * Processes an HTMLImageElement or HTMLCanvasElement into monochrome ESC/POS bits.
+   * Procesa un HTMLImageElement o HTMLCanvasElement en bytes monocromáticos ESC/POS compactados.
    * 
-   * @param {HTMLImageElement|HTMLCanvasElement} img - The image/canvas source.
-   * @param {Object} [options={}] - Processing options.
-   * @param {number} [options.width] - Target width in pixels (multiples of 8).
-   * @param {number} [options.threshold=127] - Black/white cutoff value (0-255).
-   * @param {string|boolean} [options.dither='floyd-steinberg'] - Dithering type: 'floyd-steinberg', 'atkinson', 'bayer', or false.
-   * @returns {{width: number, height: number, data: Uint8Array}} Raster dimensions and packed monochrome bytes.
+   * @param {HTMLImageElement|HTMLCanvasElement} img - Elemento de imagen o lienzo de origen.
+   * @param {Object} [options={}] - Opciones de procesamiento.
+   * @param {number} [options.width] - Ancho de destino en píxeles (múltiplos de 8).
+   * @param {number} [options.threshold=127] - Valor de corte para blanco/negro (0-255).
+   * @param {string|boolean} [options.dither='floyd-steinberg'] - Algoritmo de tramado: 'floyd-steinberg', 'atkinson', 'bayer', o false.
+   * @returns {{width: number, height: number, data: Uint8Array}} Dimensiones de la trama y bytes monocromáticos compactados.
    */
   static process(img, options = {}) {
     const threshold = options.threshold !== undefined ? options.threshold : 127;
     const dither = options.dither !== undefined ? options.dither : 'floyd-steinberg';
     
     let targetWidth = options.width || img.naturalWidth || img.width;
-    targetWidth = Math.ceil(targetWidth / 8) * 8; // Multiple of 8 required by ESC/POS
+    targetWidth = Math.ceil(targetWidth / 8) * 8; // Múltiplo de 8 requerido por comandos ESC/POS
 
     const scale = targetWidth / (img.naturalWidth || img.width);
     const targetHeight = Math.round((img.naturalHeight || img.height) * scale);
@@ -37,13 +37,13 @@ export class ImageProcessor {
   }
 
   /**
-   * Rasterizes canvas pixels into monochrome packed bytes.
+   * Rasteriza los píxeles de un lienzo canvas en bytes compactados monocromáticos.
    * 
-   * @param {HTMLCanvasElement} canvas - Offscreen canvas.
-   * @param {number} width - Canvas width.
-   * @param {number} height - Canvas height.
-   * @param {number} threshold - Threshold cutoff.
-   * @param {string|boolean} dither - Dithering algorithm name.
+   * @param {HTMLCanvasElement} canvas - Lienzo virtual de origen.
+   * @param {number} width - Ancho del lienzo.
+   * @param {number} height - Alto del lienzo.
+   * @param {number} threshold - Valor de corte (umbral).
+   * @param {string|boolean} dither - Nombre del algoritmo de tramado.
    * @returns {{width: number, height: number, data: Uint8Array}}
    */
   static rasterizeCanvas(canvas, width, height, threshold, dither) {
@@ -52,7 +52,7 @@ export class ImageProcessor {
     const pixels = imgData.data;
     const size = width * height;
     
-    // Create luminance buffer
+    // Crear búfer de luminancia
     const lum = new Float32Array(size);
     for (let i = 0; i < size; i++) {
       const idx = i * 4;
@@ -62,9 +62,9 @@ export class ImageProcessor {
       const a = pixels[idx + 3];
       
       if (a < 128) {
-        lum[i] = 255; // transparent is white
+        lum[i] = 255; // El canal transparente se convierte en blanco
       } else {
-        // Gray luminance
+        // Luminancia de escala de grises estándar
         lum[i] = 0.299 * r + 0.587 * g + 0.114 * b;
       }
     }
@@ -72,7 +72,7 @@ export class ImageProcessor {
     const binary = new Uint8Array(size);
 
     if (dither === 'floyd-steinberg') {
-      // Floyd-Steinberg Dithering
+      // Tramado Floyd-Steinberg
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
           const i = y * width + x;
@@ -91,7 +91,7 @@ export class ImageProcessor {
         }
       }
     } else if (dither === 'atkinson') {
-      // Atkinson Dithering (produces clean whites, high-contrast details)
+      // Tramado Atkinson (produce blancos limpios y detalles de alto contraste)
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
           const i = y * width + x;
@@ -114,7 +114,7 @@ export class ImageProcessor {
         }
       }
     } else if (dither === 'bayer' || dither === 'ordered') {
-      // Bayer 4x4 Ordered Dithering
+      // Tramado ordenado Bayer de 4x4
       const matrix = [
         [  0,  8,  2, 10 ],
         [ 12,  4, 14,  6 ],
@@ -131,13 +131,13 @@ export class ImageProcessor {
         }
       }
     } else {
-      // Standard Thresholding (No Dither)
+      // Umbralización estándar (Sin tramado)
       for (let i = 0; i < size; i++) {
         binary[i] = lum[i] < threshold ? 1 : 0;
       }
     }
 
-    // Pack bits into bytes
+    // Compactar bits en bytes de destino
     const widthBytes = width / 8;
     const rasterBytes = new Uint8Array(widthBytes * height);
 
@@ -162,19 +162,19 @@ export class ImageProcessor {
   }
 
   /**
-   * Renders a UTF-8 string onto an offscreen canvas and rasterizes it.
-   * This serves as the fallback printing method when printers don't support custom charsets.
+   * Renderiza una cadena de texto UTF-8 sobre un canvas virtual y luego lo rasteriza.
+   * Sirve como método de respaldo para imprimir cuando la impresora no tiene tablas de caracteres nativas adecuadas.
    * 
-   * @param {string} text - UTF-8 text string to print.
-   * @param {Object} [options={}] - Layout and font options.
-   * @param {number} [options.characterWidth=48] - Paper width in characters.
-   * @param {number} [options.fontSize=24] - Font rendering scale in px.
-   * @param {string} [options.fontFamily='monospace'] - Custom system font.
+   * @param {string} text - Cadena de texto UTF-8 a imprimir.
+   * @param {Object} [options={}] - Opciones de diseño y fuente.
+   * @param {number} [options.characterWidth=48] - Ancho del papel en número de caracteres.
+   * @param {number} [options.fontSize=24] - Tamaño de escala de fuente en px.
+   * @param {string} [options.fontFamily='monospace'] - Fuente del sistema de renderizado.
    * @returns {{width: number, height: number, data: Uint8Array}}
    */
   static rasterizeText(text, options = {}) {
     const charWidth = options.characterWidth || 48;
-    const pxWidth = charWidth * 8; // Scale to pixel columns (usually 384 or 256)
+    const pxWidth = charWidth * 8; // Escala a columnas de píxeles (normalmente 384 o 256)
     const fontSize = options.fontSize || 22;
     const fontFamily = options.fontFamily || 'Courier New, monospace';
     
@@ -187,11 +187,11 @@ export class ImageProcessor {
     canvas.height = targetHeight;
     const ctx = canvas.getContext('2d');
 
-    // Solid white background
+    // Fondo blanco sólido
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, pxWidth, targetHeight);
 
-    // Render black text
+    // Renderizar texto en negro
     ctx.fillStyle = '#000000';
     ctx.font = `${fontSize}px ${fontFamily}`;
     ctx.textBaseline = 'top';
@@ -200,7 +200,7 @@ export class ImageProcessor {
       ctx.fillText(lines[i], 0, i * lineHeight);
     }
 
-    // Rasterize text using clean Thresholding (dithering causes text blur)
+    // Rasterizar texto usando umbralización limpia (el tramado emborrona el texto pequeño)
     return this.rasterizeCanvas(canvas, pxWidth, targetHeight, 127, false);
   }
 }

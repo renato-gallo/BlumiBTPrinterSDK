@@ -1,12 +1,12 @@
 import { TicketBuilder } from "./TicketBuilder.js";
 
 /**
- * OpenFactura Standard Receipt Builder.
- * Extends TicketBuilder.
+ * Constructor de Plantilla de Boleta/Comprobante compatible con OpenFactura.
+ * Extiende de TicketBuilder.
  */
 export class OpenFacturaBuilder extends TicketBuilder {
   /**
-   * Header block.
+   * Bloque de cabecera de la boleta.
    */
   openFacturaHeader(title, companyRut, docNum) {
     this.center();
@@ -23,7 +23,7 @@ export class OpenFacturaBuilder extends TicketBuilder {
   }
 
   /**
-   * Reference documents.
+   * Bloque para documentos de referencia.
    */
   reference(docType, docNum, date) {
     this.bold(true);

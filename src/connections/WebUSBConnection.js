@@ -1,8 +1,8 @@
 import { ConnectionInterface } from "./ConnectionInterface.js";
 
 /**
- * Connection driver for WebUSB thermal printers (Roadmap Stub).
- * Extends ConnectionInterface.
+ * Controlador de conexión para impresoras térmicas mediante WebUSB (Borrador del Roadmap).
+ * Extiende de ConnectionInterface.
  */
 export class WebUSBConnection extends ConnectionInterface {
   constructor() {
@@ -16,7 +16,7 @@ export class WebUSBConnection extends ConnectionInterface {
   }
 
   async connect() {
-    throw new Error("WebUSB Connection is planned for v2.2.0 and is not yet implemented.");
+    throw new Error("La conexión WebUSB está planificada para la versión v2.2.0 y aún no ha sido implementada.");
   }
 
   async disconnect() {
@@ -25,6 +25,6 @@ export class WebUSBConnection extends ConnectionInterface {
   }
 
   async send(bytes) {
-    throw new Error("WebUSB Connection is inactive.");
+    throw new Error("La conexión WebUSB se encuentra inactiva.");
   }
 }

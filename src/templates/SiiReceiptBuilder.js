@@ -1,12 +1,12 @@
 import { TicketBuilder } from "./TicketBuilder.js";
 
 /**
- * Chilean SII (Servicio de Impuestos Internos) Receipt Builder.
- * Extends TicketBuilder.
+ * Constructor de Boletas/Comprobantes regulados bajo el S.I.I. de Chile (Servicio de Impuestos Internos).
+ * Extiende de TicketBuilder.
  */
 export class SiiReceiptBuilder extends TicketBuilder {
   /**
-   * Appends formal Chilean SII header.
+   * Añade el bloque de cabecera formal del SII chileno.
    */
   siiHeader(rut, companyName, activity, address, resolutionNum, resolutionYear) {
     this.center();
@@ -25,11 +25,11 @@ export class SiiReceiptBuilder extends TicketBuilder {
   }
 
   /**
-   * Adds the SII Electronic Signature Stamp.
-   * Prints the "Timbre Electrónico SII" text and compiles either PDF417 or QR code verification.
+   * Añade la firma del timbre electrónico del SII.
+   * Imprime el rótulo "Timbre Electrónico S.I.I." y compila el código de barras PDF417 o el código QR de verificación.
    * 
-   * @param {string} signatureData - The XML string or TED code.
-   * @param {Object} [options={}] - Config options ({ usePdf417: boolean, verificationUrl: string }).
+   * @param {string} signatureData - Los datos XML o código del timbre (TED).
+   * @param {Object} [options={}] - Opciones de configuración ({ usePdf417: boolean, verificationUrl: string }).
    * @returns {SiiReceiptBuilder}
    */
   siiTimbre(signatureData, options = {}) {
@@ -37,10 +37,10 @@ export class SiiReceiptBuilder extends TicketBuilder {
     this.text("Timbre Electrónico S.I.I.");
     
     if (options.usePdf417) {
-      // Print native PDF417 barcode
+      // Imprime el código de barras PDF417 nativo
       this.pdf417(signatureData, { columns: 10, errorLevel: 5 });
     } else if (options.verificationUrl) {
-      // Print standard verification QR code
+      // Imprime un código QR de verificación estándar
       this.qr(options.verificationUrl, 6, 'M');
     }
     

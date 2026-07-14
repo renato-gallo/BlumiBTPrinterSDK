@@ -1,74 +1,74 @@
 # BLUMI Printer SDK
 
-A premium, modular, and extensible JavaScript ES6 library for ESC/POS thermal receipt printing using Web Bluetooth (BLE), WebUSB, and Web Serial APIs.
+Una librería JavaScript premium, modular y extensible basada en ES Modules para la impresión de recibos térmicos mediante ESC/POS utilizando las APIs de Web Bluetooth (BLE), WebUSB y Web Serial.
 
-## Features
+## Características
 
-- **Decoupled Architecture**: Separation of connection layer, command compilation, and document generation.
-- **Hardware Profiles**: Custom behavior definitions for different printers (`Epson`, `XPrinter`, `JP80`, `Sunmi`, `Rongta`, `GPrinter`) without mixing logic.
-- **Multi-Charset Support**: Translation maps for CP437, CP850, CP858, CP1252, and 10+ other code tables.
-- **UTF-8 Canvas Fallback**: Prints advanced text layouts or unsupported languages by automatically rasterizing text onto offscreen canvases.
-- **Advanced Dithering**: Converts PNG/JPG/WEBP/SVG images to monochrome bit streams using Floyd-Steinberg, Atkinson, Bayer 4x4, and thresholding algorithms.
-- **Semantic Templates**: Generate standard documents like Invoices, Kitchen order slips, and Chilean SII-compliant tax receipts easily without writing ESC/POS codes.
-- **Connection Pacing (BLE Chunking)**: Sequential MTU chunk splitting prevents buffer overflow crashes on low-cost thermal printer BLE receivers.
+- **Arquitectura Desacoplada**: Separación limpia entre la capa de conexión física, la compilación de comandos y la generación semántica de documentos.
+- **Perfiles de Hardware**: Reglas de comportamiento y adaptaciones de comandos específicas para múltiples marcas (`Epson`, `XPrinter`, `JP80`, `Sunmi`, `Rongta`, `GPrinter`) sin mezclar código lógico en las aplicaciones.
+- **Soporte Multi-Juego de Caracteres**: Tablas de traducción binaria optimizadas para CP437, CP850, CP858, CP1252 y más de 10 páginas de códigos adicionales.
+- **Respaldo de Renderizado UTF-8**: Imprime textos complejos, emojis o idiomas no soportados por el hardware rasterizando automáticamente el texto en un lienzo (canvas) virtual en segundo plano.
+- **Tramado Avanzado de Imágenes**: Convierte imágenes PNG/JPG/WEBP/SVG en flujos de bits monocromáticos usando algoritmos de Floyd-Steinberg, Atkinson, Ordered Bayer 4x4 y umbralización clásica.
+- **Plantillas Semánticas**: Genera fácilmente documentos profesionales como Boletas, Facturas, Comandas de cocina, Vales de despacho y comprobantes oficiales compatibles con el S.I.I. de Chile y OpenFactura sin tener que escribir comandos ESC/POS manuales.
+- **Dosificación de Conexión (BLE Chunking)**: Fragmentación secuencial de paquetes según el MTU del dispositivo para evitar pérdidas de datos o desbordamiento en receptores BLE de impresoras de bajo costo.
 
-## Installation
+## Instalación
 
-This SDK is packaged as standard ES Modules and is ready for PWA, local HTML imports, Tauri, and Electron environments.
+Este SDK está estructurado como ES Modules estándar y está preparado para integrarse en PWA, proyectos web locales, entornos Tauri y aplicaciones Electron.
 
 ```javascript
 import { BlumiPrinter } from './src/core/BlumiPrinter.js';
 import { JP80Profile } from './src/profiles/JP80Profile.js';
 ```
 
-## Quick Start
+## Inicio Rápido
 
 ```javascript
-// Instantiate printer with a specific profile
-const printer = new BlumiPrinter({
+// Instanciar la impresora con un perfil de hardware específico
+const impresora = new BlumiPrinter({
   profile: new JP80Profile(),
   characterWidth: 48,
   charset: 'cp850'
 });
 
-// Prompt pairing window and establish BLE connection
-await printer.connect();
+// Desplegar diálogo del navegador y conectar por Bluetooth BLE
+await impresora.connect();
 
-// Build and print a receipt using a semantic template
-await printer.ticket(async (ticket) => {
+// Compilar e imprimir una boleta usando una plantilla semántica
+await impresora.ticket(async (ticket) => {
   await ticket.image('logo.png', { dither: true });
   
   ticket.center()
         .bold(true)
-        .text("BLUMI SPA")
+        .text("MUNDO BAREFOOT")
         .bold(false)
         .line()
-        .row("Premium Software Solution", "$99.990")
-        .total("$99.990")
-        .qr("https://blumi.cl")
+        .row("Zapato Respetuoso Providencia", "$64.990")
+        .total("$64.990")
+        .qr("https://mundobarefoot.cl")
         .feed(3)
         .cut();
 });
 ```
 
-## Folder Structure
+## Estructura de Carpetas
 
 ```
-├── examples/              # Usage demos and code snippets
-├── tests/                 # Testing suites for encoders and processors
+├── examples/              # Demos de uso y fragmentos de código de prueba
+├── tests/                 # Suite de pruebas unitarias para codificación y procesamiento
 ├── src/
-│   ├── core/              # Orchestrator and ESC/POS command compilers
-│   ├── connections/       # WebBluetooth, WebUSB, and WebSerial drivers
-│   ├── profiles/          # Vendor hardware behavior rules
-│   ├── encoding/          # Character code pages translations
-│   ├── images/            # Image dithering and scaling
-│   ├── queue/             # Printing queue scheduler
-│   ├── templates/         # Invoice, Kitchen, Delivery, and SII Builders
-│   └── utils/             # Binary helpers and image loading utilities
+│   ├── core/              # Orquestador del SDK y compiladores de comandos ESC/POS
+│   ├── connections/       # Controladores de WebBluetooth, WebUSB y WebSerial
+│   ├── profiles/          # Reglas de comportamiento de hardware específicas de fabricantes
+│   ├── encoding/          # Traducciones y codificación de caracteres a bytes
+│   ├── images/            # Algoritmos de tramado y redimensionado de imágenes
+│   ├── queue/             # Planificador y cola de tareas de impresión
+│   ├── templates/         # Constructores de Boletas, Facturas, Cocina, Envíos y SII
+│   └── utils/             # Funciones auxiliares de carga binaria e imágenes
 ```
 
-## Documentation
+## Documentación
 
-For full parameters and API details, check [API.md](file:///c:/Users/Windows%2010%20Pro/Desktop/Clientes/MundoBarefoot/API.md).
-To participate in development, see [CONTRIBUTING.md](file:///c:/Users/Windows%2010%20Pro/Desktop/Clientes/MundoBarefoot/CONTRIBUTING.md).
-Follow updates in [CHANGELOG.md](file:///c:/Users/Windows%2010%20Pro/Desktop/Clientes/MundoBarefoot/CHANGELOG.md) and see upcoming work in [ROADMAP.md](file:///c:/Users/Windows%2010%20Pro/Desktop/Clientes/MundoBarefoot/ROADMAP.md).
+Para ver los parámetros detallados de los métodos y clases, consulta la guía [API.md](file:///c:/Users/Windows%2010%20Pro/Desktop/Clientes/MundoBarefoot/API.md).
+Para contribuir con el desarrollo del SDK, lee [CONTRIBUTING.md](file:///c:/Users/Windows%2010%20Pro/Desktop/Clientes/MundoBarefoot/CONTRIBUTING.md).
+Sigue las correcciones y versiones en [CHANGELOG.md](file:///c:/Users/Windows%2010%20Pro/Desktop/Clientes/MundoBarefoot/CHANGELOG.md) y consulta la hoja de ruta de la librería en [ROADMAP.md](file:///c:/Users/Windows%2010%20Pro/Desktop/Clientes/MundoBarefoot/ROADMAP.md).

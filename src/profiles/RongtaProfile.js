@@ -1,8 +1,8 @@
 import { PrinterProfile } from "./PrinterProfile.js";
 
 /**
- * Rongta Profile.
- * Extends PrinterProfile.
+ * Perfil de impresora Rongta Estándar ESC/POS.
+ * Extiende de PrinterProfile.
  */
 export class RongtaProfile extends PrinterProfile {
   constructor() {

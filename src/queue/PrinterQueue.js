@@ -1,27 +1,27 @@
 /**
- * Serializes print execution requests to ensure separate data payloads
- * do not write concurrently to the BLE/USB endpoint, preventing connection blockages.
+ * Serializa las solicitudes de ejecución de impresión para asegurar que los flujos de datos
+ * no se escriban de forma concurrente en el canal BLE/USB, previniendo bloqueos en la conexión.
  */
 export class PrinterQueue {
   constructor() {
     /**
-     * Pending jobs queue.
+     * Cola de trabajos de impresión pendientes.
      * @type {Function[]}
      */
     this.queue = [];
     
     /**
-     * Active state flag.
+     * Indicador de estado de ejecución activa de la cola.
      * @type {boolean}
      */
     this.running = false;
   }
 
   /**
-   * Adds an asynchronous printing operation to the serialization queue.
+   * Añade una operación de impresión asíncrona a la cola de serialización.
    * 
-   * @param {Function} asyncJob - An async function representing the print operation.
-   * @returns {Promise<any>} Resolves when the scheduled job completes.
+   * @param {Function} asyncJob - Función asíncrona que representa la operación de impresión.
+   * @returns {Promise<any>} Resoluble cuando se completa el trabajo programado.
    */
   add(asyncJob) {
     return new Promise((resolve, reject) => {
@@ -39,7 +39,7 @@ export class PrinterQueue {
   }
 
   /**
-   * Evaluates and runs the next job in sequence.
+   * Evalúa y ejecuta la siguiente tarea de la cola en secuencia.
    * @private
    */
   async _processNext() {
@@ -53,7 +53,7 @@ export class PrinterQueue {
     try {
       await task();
     } catch (err) {
-      console.error("[Queue] Print task execution failed:", err);
+      console.error("[Queue] Falló la ejecución de la tarea de impresión:", err);
     } finally {
       this.running = false;
       this._processNext();
@@ -61,7 +61,7 @@ export class PrinterQueue {
   }
 
   /**
-   * Empties all pending operations in the scheduler.
+   * Vacía todas las operaciones de impresión pendientes en la cola.
    */
   clear() {
     this.queue = [];

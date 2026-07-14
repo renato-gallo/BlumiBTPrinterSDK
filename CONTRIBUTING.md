@@ -1,40 +1,40 @@
-# Contributing to BLUMI Printer SDK
+# Contribuir al BLUMI Printer SDK
 
-Thank you for showing interest in contributing to the **BLUMI Printer SDK**! 
-To maintain a high level of code quality and architectural integrity, please read and follow these guidelines.
+¡Gracias por mostrar interés en contribuir al desarrollo del **BLUMI Printer SDK**!
+Para mantener un alto estándar de calidad del código y conservar la integridad arquitectónica de la librería, te pedimos leer y seguir estas directrices de desarrollo.
 
-## Development Rules
+## Reglas de Desarrollo
 
-1. **Strict ES Modules**: Write all source files as pure ES Modules (`import`/`export` syntax). Do not use CommonJS (`require`).
-2. **Modular Architecture**:
-   - Connection layers belong in `src/connections/`.
-   - Command compilation belongs in `src/core/EscPosEncoder.js`.
-   - Layout patterns belong in `src/templates/`.
-   - Printer-specific codes and widths belong in `src/profiles/`.
-3. **No Duplicated Logic (DRY)**: Do not duplicate byte compiling commands. If a command is shared, it must sit in the base classes (`PrinterProfile` or `TicketBuilder`).
-4. **JSDoc Style**: All classes, methods, parameters, and return types must be fully documented using JSDoc.
-5. **No Globals**: The library must never modify the global window, navigator, or document contexts outside encapsulated functions.
+1.  **ES Modules Estrictos**: Escribe todos los archivos de origen utilizando ES Modules puros (sintaxis `import`/`export`). No utilices CommonJS (`require`).
+2.  **Arquitectura Modular**:
+    *   Las capas de conexión física pertenecen a `src/connections/`.
+    *   La compilación de comandos binarios pertenece a `src/core/EscPosEncoder.js`.
+    *   Los diseños y diagramaciones de plantillas pertenecen a `src/templates/`.
+    *   Las particularidades de códigos y anchos de caracteres de marcas pertenecen a `src/profiles/`.
+3.  **Código Limpio (DRY)**: No dupliques comandos de bytes. Si un comando o lógica es común a varias impresoras, debe ubicarse en las clases base (`PrinterProfile` o `TicketBuilder`).
+4.  **Estilo JSDoc**: Todas las clases, métodos, parámetros y tipos de retorno deben estar completamente documentados utilizando etiquetas JSDoc en español.
+5.  **Entorno Limpio**: La librería nunca debe modificar los contextos globales de `window`, `navigator` o `document` fuera de funciones encapsuladas.
 
-## Adding a Printer Profile
+## Añadir un Perfil de Impresora
 
-To support a new printer model:
-1. Create a file `src/profiles/YourPrinterProfile.js`.
-2. Extend `PrinterProfile`.
-3. Override only the specific commands where the hardware deviates from standard Epson ESC/POS (e.g. `cut()`, `qr()`, or `supportedCodePages`).
-4. Export the profile in `src/profiles/index.js` or import it in `BlumiPrinter.js`.
+Para añadir soporte a un nuevo fabricante o modelo de impresora térmica:
+1.  Crea un nuevo archivo en `src/profiles/MiPerfilDeImpresoraProfile.js`.
+2.  Hereda de la clase base `PrinterProfile`.
+3.  Anula u sobrescribe únicamente los comandos específicos donde el hardware difiera del estándar Epson ESC/POS (como `cut()`, `qr()` o las páginas de códigos soportadas `supportedCodePages`).
+4.  Exporta el perfil en `src/profiles/index.js` o impórtalo en `BlumiPrinter.js`.
 
-## Code Style Guide
+## Guía de Estilo de Código
 
-- Class naming: `CamelCase` (e.g., `BluetoothConnection`).
-- Method/Variable naming: `camelCase` (e.g., `isConnected`).
-- Constant naming: `UPPER_SNAKE_CASE` (e.g., `SERVICE_UUID`).
-- Formatting: 2-space indentation, semicolons required.
+-   Clases: `CamelCase` (ej. `BluetoothConnection`).
+-   Métodos y variables: `camelCase` (ej. `isConnected`).
+-   Constantes: `UPPER_SNAKE_CASE` (ej. `SERVICE_UUID`).
+-   Formateo: Indentación de 2 espacios, uso obligatorio de punto y coma al final de las sentencias.
 
-## Submitting Pull Requests
+## Envío de Pull Requests
 
-- Increase the version number according to Semantic Versioning rules:
-  - **PATCH**: Bug fixes (non-breaking).
-  - **MINOR**: New features (non-breaking, backward compatible).
-  - **MAJOR**: Structural/breaking changes.
-- Document all changes under the appropriate headers (`Added`, `Changed`, `Fixed`, etc.) in `CHANGELOG.md`.
-- Keep tasks up-to-date in `ROADMAP.md`.
+-   Incrementa la versión del paquete respetando las reglas de Semantic Versioning:
+    *   **PATCH**: Corrección de fallos (sin romper compatibilidad).
+    *   **MINOR**: Nuevas funcionalidades (compatibles hacia atrás).
+    *   **MAJOR**: Cambios estructurales o que rompen compatibilidad.
+-   Documenta todos los cambios bajo los títulos correspondientes (`Added`, `Changed`, `Fixed`, etc.) en el archivo `CHANGELOG.md`.
+-   Mantenga actualizadas las tareas en `ROADMAP.md`.

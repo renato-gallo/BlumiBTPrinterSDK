@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [3.2.0] - 2026-07-18
+
+### Added
+- **`reconnectSaved()`**: Nuevo método en `BluetoothConnection` que recupera el dispositivo previamente autorizado usando `navigator.bluetooth.getDevices()` y el ID guardado en `localStorage`, permitiendo reconexión en un solo clic tras recargar la página sin volver a mostrar el diálogo de escaneo.
+- **Persistencia automática de dispositivo**: El método `connect()` ahora guarda automáticamente el ID del dispositivo Bluetooth en `localStorage` bajo la clave `blumi_ble_device_id` tras cada conexión exitosa.
+- **`startKeepAlive(intervalMs)`**: Nuevo método que activa un pulso periódico de mantenimiento de canal BLE para prevenir que el firmware de la impresora o el S.O. rompan el enlace por inactividad. Intervalo configurable (por defecto 45 segundos).
+- **`stopKeepAlive()`**: Nuevo método para desactivar el keep-alive de forma controlada. También se llama automáticamente al desconectar.
+
 ## [3.1.2] - 2026-07-14
 
 ### Changed

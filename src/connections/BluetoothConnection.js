@@ -1,7 +1,12 @@
 import { ConnectionInterface } from "./ConnectionInterface.js";
 
+/** Clave de almacenamiento local para el ID del dispositivo Bluetooth memorizado */
+const STORAGE_KEY = 'blumi_ble_device_id';
+
 /**
  * Controlador de conexión para impresoras térmicas BLE mediante Web Bluetooth.
+ * Incluye reconexión automática ante desconexiones físicas, persistencia de
+ * dispositivo en localStorage y keep-alive configurable para evitar timeouts BLE.
  * Extiende de ConnectionInterface.
  */
 export class BluetoothConnection extends ConnectionInterface {
@@ -14,6 +19,9 @@ export class BluetoothConnection extends ConnectionInterface {
     this.connected = false;
     this.reconnecting = false;
     this.autoReconnectEnabled = true;
+
+    /** @private - ID del intervalo keep-alive activo */
+    this._keepAliveTimer = null;
 
     // Configuraciones de UUID por defecto
     this.SERVICE_UUID = '49535343-fe7d-4ae5-8fa9-9fafd205e455';
@@ -54,6 +62,8 @@ export class BluetoothConnection extends ConnectionInterface {
 
   /**
    * Establece la conexión GATT con el dispositivo.
+   * Persiste el ID del dispositivo en localStorage para permitir reconexión rápida
+   * en futuras sesiones sin necesidad de volver a mostrar el diálogo de emparejamiento.
    * @returns {Promise<boolean>}
    */
   async connect() {
@@ -73,6 +83,11 @@ export class BluetoothConnection extends ConnectionInterface {
       this.device.removeEventListener('gattserverdisconnected', this._onDisconnected);
       this.device.addEventListener('gattserverdisconnected', this._onDisconnected.bind(this));
 
+      // Persistir el ID del dispositivo en localStorage para reconexión rápida
+      if (this.device.id && typeof localStorage !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY, this.device.id);
+      }
+
       this.connected = true;
       this._notifyStateChange('connected');
       return true;
@@ -84,12 +99,49 @@ export class BluetoothConnection extends ConnectionInterface {
   }
 
   /**
-   * Cierra de forma programada la conexión GATT.
+   * Intenta reconectar con el dispositivo previamente emparejado guardado en localStorage,
+   * sin mostrar el diálogo de escaneo al usuario. Requiere un gesto del usuario para activarse.
+   * Útil al recargar la página en una nueva sesión de navegador.
+   * @returns {Promise<boolean>} true si reconectó, false si no hay dispositivo guardado o no está disponible.
+   */
+  async reconnectSaved() {
+    if (typeof localStorage === 'undefined') return false;
+
+    const savedId = localStorage.getItem(STORAGE_KEY);
+    if (!savedId) {
+      console.warn('[BLE] No hay ningún dispositivo Bluetooth memorizado en esta sesión.');
+      return false;
+    }
+
+    try {
+      // getDevices() retorna la lista de dispositivos previamente autorizados en este origen
+      const authorizedDevices = await navigator.bluetooth.getDevices();
+      const found = authorizedDevices.find(d => d.id === savedId);
+
+      if (!found) {
+        console.warn('[BLE] El permiso del dispositivo guardado expiró o no está disponible.');
+        localStorage.removeItem(STORAGE_KEY);
+        return false;
+      }
+
+      // Recuperar el objeto de dispositivo e intentar la conexión GATT
+      this.device = found;
+      await this.connect();
+      return true;
+    } catch (err) {
+      console.error('[BLE] Error al intentar reconectar el dispositivo guardado:', err);
+      return false;
+    }
+  }
+
+  /**
+   * Cierra de forma programada la conexión GATT y detiene el keep-alive.
    * @returns {Promise<void>}
    */
   async disconnect() {
     const wasAutoReconnect = this.autoReconnectEnabled;
     this.autoReconnectEnabled = false;
+    this.stopKeepAlive();
 
     try {
       if (this.device?.gatt?.connected) {
@@ -106,7 +158,7 @@ export class BluetoothConnection extends ConnectionInterface {
   }
 
   /**
-   * Intenta recuperar la conexión con el último dispositivo emparejado.
+   * Intenta recuperar la conexión con el último dispositivo emparejado en esta sesión.
    * @returns {Promise<boolean>}
    */
   async reconnect() {
@@ -139,6 +191,41 @@ export class BluetoothConnection extends ConnectionInterface {
     this.reconnecting = false;
     this._notifyStateChange('disconnected', new Error("La reconexión ha fallado tras alcanzar el número máximo de intentos."));
     return false;
+  }
+
+  /**
+   * Activa el mecanismo de keep-alive que envía un pulso vacío a la impresora de forma periódica
+   * para evitar que el firmware o el sistema operativo rompan el enlace BLE por inactividad.
+   * @param {number} [intervalMs=45000] - Intervalo en milisegundos entre cada pulso. Por defecto 45 segundos.
+   */
+  startKeepAlive(intervalMs = 45000) {
+    this.stopKeepAlive(); // Detener intervalo previo si había uno activo
+
+    this._keepAliveTimer = setInterval(async () => {
+      if (!this.isConnected()) return;
+
+      try {
+        // Escribir un arreglo vacío como pulso de mantenimiento de canal BLE
+        if (this.characteristic?.writeValueWithoutResponse) {
+          await this.characteristic.writeValueWithoutResponse(new Uint8Array([0x00]));
+        }
+      } catch {
+        // El error de keep-alive no es crítico; la desconexión se maneja en _onDisconnected
+      }
+    }, intervalMs);
+
+    console.log(`[BLE] Keep-alive activado (pulso cada ${intervalMs / 1000}s).`);
+  }
+
+  /**
+   * Desactiva el mecanismo de keep-alive.
+   */
+  stopKeepAlive() {
+    if (this._keepAliveTimer !== null) {
+      clearInterval(this._keepAliveTimer);
+      this._keepAliveTimer = null;
+      console.log('[BLE] Keep-alive desactivado.');
+    }
   }
 
   /**

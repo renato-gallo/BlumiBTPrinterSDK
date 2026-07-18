@@ -131,25 +131,38 @@ Envía la orden física de corte de papel (completo o parcial).
 
 ## 4. Controladores de Conexión
 
-Todos los drivers heredan de la clase abstracta `ConnectionInterface` e implementan la interfaz común de operaciones:
-*   `connect()`: Inicia el diálogo de vinculación física o establece la comunicación. Retorna `Promise<boolean>`.
-*   `disconnect()`: Cierra el puerto/socket liberando los recursos de hardware de forma ordenada. Retorna `Promise<void>`.
-*   `send(bytes)`: Escribe un arreglo binario `Uint8Array` en el canal de salida activo. Retorna `Promise<void>`.
-*   `isConnected()`: Verifica y retorna el estado lógico del canal de conexión (`boolean`).
+Todos los drivers heredan de la clase abstracta `ConnectionInterface` e implementan la interfaz común:
+*   `connect()`: Inicia el diálogo de vinculación o establece la comunicación. Retorna `Promise<boolean>`.
+*   `reconnectSaved()`: Reconecta al dispositivo previamente autorizado **sin mostrar el diálogo de selección**. Requiere un gesto del usuario (clic). Retorna `Promise<boolean>`.
+*   `disconnect()`: Cierra el canal liberando recursos de forma ordenada. Retorna `Promise<void>`.
+*   `send(bytes)`: Escribe un `Uint8Array` en el canal activo. Retorna `Promise<void>`.
+*   `isConnected()`: Retorna el estado lógico del canal (`boolean`).
 
 ### `BluetoothConnection`
-Driver Web Bluetooth para impresoras BLE. Utiliza por defecto el UUID de servicio Microchip (`49535343-fe7d-4ae5-8fa9-9fafd205e455`) y característica de escritura (`49535343-8841-43f4-a8d4-ecbe34729bb3`). Realiza fraccionamiento (MTU pacing) en paquetes de 100 bytes con 15ms de retraso de forma interna para evitar desbordamientos y bloqueos de GATT.
+Driver Web Bluetooth para impresoras BLE. UUID de servicio Microchip por defecto (`49535343-fe7d-4ae5-8fa9-9fafd205e455`). Fraccionamiento interno de 100 bytes / 15ms de pausa para evitar desbordamiento del buffer GATT.
+
+**Métodos adicionales exclusivos de BLE:**
+- `reconnectSaved()`: Usa `navigator.bluetooth.getDevices()` + ID guardado en `localStorage` (`blumi_ble_device_id`) para reconectar sin el diálogo de escaneo.
+- `startKeepAlive(intervalMs = 45000)`: Activa un pulso periódico de un byte para mantener el canal BLE activo y evitar que el firmware corte el enlace por inactividad.
+- `stopKeepAlive()`: Desactiva el keep-alive (también se llama automáticamente al desconectar).
 
 ### `WebUSBConnection`
-Driver WebUSB compatible con navegadores Chromium (Chrome/Edge). Filtra dispositivos emparejados mediante la clase de impresora universal `0x07`. Localiza de forma dinámica la interfaz bulk OUT activa del fabricante del hardware y fracciona la escritura en bloques de 64 bytes (estándar USB bulk).
+Driver WebUSB compatible con navegadores Chromium (Chrome/Edge). Filtra por clase de impresora USB universal (`classCode: 7`). Localiza dinámicamente el endpoint Bulk OUT y fracciona en bloques de 64 bytes.
+
+**Persistencia entre sesiones:**
+- `reconnectSaved()`: Usa `navigator.usb.getDevices()` para recuperar la impresora USB previamente autorizada en este origen y reconectarla directamente. **No requiere localStorage**: WebUSB persiste los permisos de forma nativa en el navegador.
 
 ### `WebSerialConnection`
-Driver Web Serial API para conexiones serie a través de adaptadores RS232 o conversores USB-a-Serie. Se conecta utilizando la velocidad estándar del hardware serie (`baudRate: 9600`) y opera mediante flujos de corrientes de escritura nativos (`WritableStream`).
+Driver Web Serial API para puertos COM, adaptadores RS232 y conversores USB-a-Serie.
+- `constructor(options)`: Acepta `{ baudRate: number }` para configurar la velocidad de comunicación (por defecto `9600`).
+
+**Persistencia entre sesiones:**
+- `reconnectSaved()`: Usa `navigator.serial.getPorts()` para recuperar el primer puerto COM previamente autorizado y abrirlo directamente. **No requiere localStorage**: Web Serial persiste los permisos de forma nativa en el navegador.
 
 ### `NetworkConnection`
-Driver TCP Raw Socket para impresoras de red locales mediante cable Ethernet o WiFi en el puerto `9100`.
-- `constructor(host, port)`: Permite indicar la dirección IP (por defecto `192.168.1.100`) y puerto (por defecto `9100`).
-- **Compatibilidad**: Diseñado para integrarse nativamente en entornos Electron, Tauri y Node.js importando de forma dinámica el módulo `'net'`. Lanza un error controlado si es invocado en entornos de navegadores web puros debido a restricciones del Sandbox de red.
+Driver TCP Raw Socket para impresoras de red (WiFi/Ethernet) en el puerto estándar JetDirect `9100`.
+- `constructor(host, port)`: IP (por defecto `192.168.1.100`) y puerto (por defecto `9100`).
+- **Compatibilidad**: Nativo en Electron, Tauri y Node.js (carga dinámica del módulo `net`). Lanza error controlado en navegadores web puros por restricciones del Sandbox.
 
 ---
 

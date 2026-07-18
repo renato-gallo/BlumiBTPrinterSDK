@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [3.3.0] - 2026-07-18
+
+### Added
+- **`WebUSBConnection.reconnectSaved()`**: Recupera la impresora USB previamente autorizada usando `navigator.usb.getDevices()` y reconecta directamente sin mostrar el diálogo de selección. No requiere `localStorage`; WebUSB persiste los permisos de forma nativa.
+- **`WebSerialConnection.reconnectSaved()`**: Recupera el primer puerto COM previamente autorizado usando `navigator.serial.getPorts()` y reconecta directamente. No requiere `localStorage`; Web Serial persiste los permisos de forma nativa.
+- **`WebSerialConnection` baudRate configurable**: El constructor ahora acepta `{ baudRate: number }` como opción (por defecto `9600`).
+
+### Changed
+- Refactorización interna de `WebUSBConnection` extrayendo `_openDevice()` y `_resetState()` para eliminar duplicación de código entre `connect()` y `reconnectSaved()`.
+- Refactorización interna de `WebSerialConnection` extrayendo `_openPort()` y `_resetState()` de forma análoga.
+
 ## [3.2.0] - 2026-07-18
 
 ### Added

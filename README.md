@@ -71,12 +71,17 @@ import { BlumiPrinter } from 'blumi-printer-sdk';
 import { WebUSBConnection } from 'blumi-printer-sdk/connections';
 import { JP80Profile } from 'blumi-printer-sdk/profiles';
 
-const impresora = new BlumiPrinter({
-  connection: new WebUSBConnection(), // Driver USB
-  profile: new JP80Profile()
-});
+const conexion = new WebUSBConnection();
+const impresora = new BlumiPrinter({ connection: conexion, profile: new JP80Profile() });
 
 await impresora.connect(); // Solicita permiso de puerto USB e inicia
+
+// ✅ Reconexión "un clic" al recargar la página (sin diálogo de selección):
+// <button onclick="reconectar()">Reconectar</button>
+async function reconectar() {
+  const ok = await conexion.reconnectSaved(); // usa navigator.usb.getDevices()
+  if (!ok) await impresora.connect(); // fallback al diálogo si no hay autorización previa
+}
 ```
 
 ### Impresión por Red WiFi o Ethernet (TCP Directo)
@@ -103,12 +108,17 @@ import { BlumiPrinter } from 'blumi-printer-sdk';
 import { WebSerialConnection } from 'blumi-printer-sdk/connections';
 import { JP80Profile } from 'blumi-printer-sdk/profiles';
 
-const impresora = new BlumiPrinter({
-  connection: new WebSerialConnection(), // Driver de puerto Serie
-  profile: new JP80Profile()
-});
+const conexion = new WebSerialConnection({ baudRate: 9600 }); // baudRate configurable
+const impresora = new BlumiPrinter({ connection: conexion, profile: new JP80Profile() });
 
-await impresora.connect(); // Abre diálogo nativo de puertos COM
+// ✅ Reconexión "un clic" al recargar la página (sin diálogo de selección):
+// <button onclick="reconectar()">Reconectar</button>
+async function reconectar() {
+  const ok = await conexion.reconnectSaved(); // usa navigator.serial.getPorts()
+  if (!ok) await impresora.connect(); // fallback al diálogo si no hay autorización previa
+}
+
+await impresora.connect(); // primera conexión: abre diálogo nativo de puertos COM
 ```
 
 ## Estructura de Carpetas

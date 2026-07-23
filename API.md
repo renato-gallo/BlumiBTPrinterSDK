@@ -31,29 +31,6 @@ Retorna un objeto con banderas y detalles del estado de conexión: `{ connected:
 Construye e imprime un ticket básico mediante `TicketBuilder`.
 - `callback(ticket)`: Función que recibe una instancia de `TicketBuilder`.
 
-### `async invoice(callback)`
-Construye e imprime una factura mediante `InvoiceBuilder`.
-- `callback(invoice)`: Función que recibe una instancia de `InvoiceBuilder`.
-
-### `async kitchen(callback)`
-Construye e imprime una comanda de cocina mediante `KitchenBuilder`.
-- `callback(kitchen)`: Función que recibe una instancia de `KitchenBuilder`.
-
-### `async delivery(callback)`
-Construye e imprime un vale de entrega mediante `DeliveryBuilder`.
-- `callback(delivery)`: Función que recibe una instancia de `DeliveryBuilder`.
-
-### `async receipt(callback)`
-Construye e imprime una boleta o recibo estándar mediante `ReceiptBuilder`.
-- `callback(receipt)`: Función que recibe una instancia de `ReceiptBuilder`.
-
-### `async openFactura(callback)`
-Construye e imprime un comprobante compatible con OpenFactura mediante `OpenFacturaBuilder`.
-- `callback(openFactura)`: Función que recibe una instancia de `OpenFacturaBuilder`.
-
-### `async siiReceipt(callback)`
-Construye e imprime una boleta oficial regulada por el SII de Chile mediante `SiiReceiptBuilder`.
-- `callback(siiReceipt)`: Función que recibe una instancia de `SiiReceiptBuilder`.
 
 ---
 
@@ -111,25 +88,8 @@ Envía la orden física de corte de papel (completo o parcial).
 
 ---
 
-## 3. Constructores Especializados
 
-### `ReceiptBuilder` (extiende de `TicketBuilder`)
-- `receiptHeader(title, subtitle, address)`: Añade bloques de dirección y comercio.
-- `item(name, qty, price)`: Formatea filas de ítems con totales de línea.
-- `summary(subtotal, tax, total)`: Resumen del comprobante de ventas con IVA.
-- `footer(msg)`: Mensaje de pie de página centrado.
-
-### `OpenFacturaBuilder` (extiende de `TicketBuilder`)
-- `openFacturaHeader(title, companyRut, docNum)`: Cabecera formal de OpenFactura con Rut.
-- `reference(docType, docNum, date)`: Sección de documentos de referencia relacionados.
-
-### `SiiReceiptBuilder` (extiende de `TicketBuilder`)
-- `siiHeader(rut, companyName, activity, address, resolutionNum, resolutionYear)`: Bloque formal regulado por el SII de Chile.
-- `siiTimbre(signatureData, options)`: Renderiza el Timbre Electrónico del SII mediante PDF417 nativo o código QR de verificación.
-
----
-
-## 4. Controladores de Conexión
+## 3. Controladores de Conexión
 
 Todos los drivers heredan de la clase abstracta `ConnectionInterface` e implementan la interfaz común:
 *   `connect()`: Inicia el diálogo de vinculación o establece la comunicación. Retorna `Promise<boolean>`.
@@ -166,7 +126,7 @@ Driver TCP Raw Socket para impresoras de red (WiFi/Ethernet) en el puerto están
 
 ---
 
-## 5. Perfiles de Impresoras
+## 4. Perfiles de Impresoras
 
 Los perfiles traducen las directivas semánticas a secuencias binarias ESC/POS de marcas:
 - `EpsonProfile`: Comandos estándar ESC/POS y dimensiones de 80mm (48 columnas).

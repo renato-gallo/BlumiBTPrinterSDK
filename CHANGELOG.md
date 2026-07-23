@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [4.0.0] - 2026-07-22
+
+### Changed
+- **Eliminación de referencias a marca de terceros**: Se reemplazaron todas las menciones a "Mundo Barefoot" en la documentación, ejemplos e interfaz interactiva por referencias genéricas de comercio ("BLUMI SPA", "Mi Comercio", etc.) para mantener la identidad neutral del SDK como propiedad intelectual de Renato Gallo.
+- **Simplificación y Limpieza del SDK (Breaking Changes)**: Se eliminaron los constructores específicos (`OpenFacturaBuilder`, `SiiReceiptBuilder`, `ReceiptBuilder`, `InvoiceBuilder`, `DeliveryBuilder`, `KitchenBuilder`) y sus correspondientes llamadas en `BlumiPrinter` para eliminar la sobreingeniería. Ahora toda la maquetación se realiza de forma flexible usando el constructor universal `TicketBuilder` o mediante llamadas encadenadas directas en el orquestador.
+
 ## [3.3.0] - 2026-07-18
 
 ### Added

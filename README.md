@@ -16,7 +16,7 @@ Una librería JavaScript modular y extensible basada en ES Modules para la impre
 - **Soporte Multi-Juego de Caracteres**: Tablas de traducción binaria optimizadas para CP437, CP850, CP858, CP1252 y más de 10 páginas de códigos adicionales.
 - **Respaldo de Renderizado UTF-8**: Imprime textos complejos, emojis o idiomas no soportados por el hardware rasterizando automáticamente el texto en un lienzo (canvas) virtual en segundo plano.
 - **Tramado Avanzado de Imágenes**: Convierte imágenes PNG/JPG/WEBP/SVG en flujos de bits monocromáticos usando algoritmos de Floyd-Steinberg, Atkinson, Ordered Bayer 4x4 y umbralización clásica.
-- **Plantillas Semánticas**: Genera fácilmente documentos profesionales como Boletas, Facturas, Comandas de cocina, Vales de despacho y comprobantes oficiales compatibles con el S.I.I. de Chile y OpenFactura sin tener que escribir comandos ESC/POS manuales.
+- **Constructor Semántico**: Genera fácilmente documentos profesionales con formato enriquecido (logos, tablas estructuradas, códigos de barras y QR) usando una API orientada a objetos fluida y legible, sin tener que escribir secuencias de comandos ESC/POS manuales.
 - **Dosificación de Conexión (BLE Chunking)**: Fragmentación secuencial de paquetes según el MTU del dispositivo para evitar pérdidas de datos o desbordamiento en receptores BLE de impresoras de bajo costo.
 
 ## Instalación
@@ -49,12 +49,12 @@ await impresora.ticket(async (ticket) => {
   
   ticket.center()
         .bold(true)
-        .text("MUNDO BAREFOOT")
+        .text("BLUMI SPA")
         .bold(false)
         .line()
-        .row("Zapato Respetuoso Providencia", "$64.990")
-        .total("$64.990")
-        .qr("https://mundobarefoot.cl")
+        .row("Servicio de Impresión", "$19.990")
+        .total("$19.990")
+        .qr("https://blumi.cl")
         .feed(3)
         .cut();
 });
@@ -133,7 +133,7 @@ await impresora.connect(); // primera conexión: abre diálogo nativo de puertos
 │   ├── encoding/          # Traducciones y codificación de caracteres a bytes
 │   ├── images/            # Algoritmos de tramado y redimensionado de imágenes
 │   ├── queue/             # Planificador y cola de tareas de impresión
-│   ├── templates/         # Constructores de Boletas, Facturas, Cocina, Envíos y SII
+│   ├── templates/         # Contiene la clase base TicketBuilder para estructurar recibos
 │   └── utils/             # Funciones auxiliares de carga binaria e imágenes
 ```
 

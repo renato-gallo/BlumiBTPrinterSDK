@@ -3,12 +3,6 @@ import { EpsonProfile } from "../profiles/EpsonProfile.js";
 import { EscPosEncoder } from "./EscPosEncoder.js";
 import { PrinterQueue } from "../queue/PrinterQueue.js";
 import { TicketBuilder } from "../templates/TicketBuilder.js";
-import { InvoiceBuilder } from "../templates/InvoiceBuilder.js";
-import { KitchenBuilder } from "../templates/KitchenBuilder.js";
-import { DeliveryBuilder } from "../templates/DeliveryBuilder.js";
-import { ReceiptBuilder } from "../templates/ReceiptBuilder.js";
-import { OpenFacturaBuilder } from "../templates/OpenFacturaBuilder.js";
-import { SiiReceiptBuilder } from "../templates/SiiReceiptBuilder.js";
 import { concatUint8Arrays, loadImage } from "../utils/utils.js";
 import { ImageProcessor } from "../images/ImageProcessor.js";
 
@@ -314,95 +308,6 @@ export class BlumiPrinter {
     return await this._sendBytes(t.build());
   }
 
-  /**
-   * Construye una factura genérica mediante InvoiceBuilder y la envía a la cola.
-   * @param {Function} callback - Acciones de configuración en la instancia del constructor.
-   * @returns {Promise<any>}
-   */
-  async invoice(callback) {
-    const t = new InvoiceBuilder({
-      characterWidth: this.characterWidth,
-      charset: this.charset,
-      encoder: this.encoder
-    });
-    await callback(t);
-    return await this._sendBytes(t.build());
-  }
-
-  /**
-   * Construye una comanda de cocina mediante KitchenBuilder y la envía a la cola.
-   * @param {Function} callback - Acciones de configuración en la instancia del constructor.
-   * @returns {Promise<any>}
-   */
-  async kitchen(callback) {
-    const t = new KitchenBuilder({
-      characterWidth: this.characterWidth,
-      charset: this.charset,
-      encoder: this.encoder
-    });
-    await callback(t);
-    return await this._sendBytes(t.build());
-  }
-
-  /**
-   * Construye un vale de despacho o entrega mediante DeliveryBuilder y lo envía a la cola.
-   * @param {Function} callback - Acciones de configuración en la instancia del constructor.
-   * @returns {Promise<any>}
-   */
-  async delivery(callback) {
-    const t = new DeliveryBuilder({
-      characterWidth: this.characterWidth,
-      charset: this.charset,
-      encoder: this.encoder
-    });
-    await callback(t);
-    return await this._sendBytes(t.build());
-  }
-
-  /**
-   * Construye una boleta/recibo estándar mediante ReceiptBuilder y la envía a la cola.
-   * @param {Function} callback - Acciones de configuración en la instancia del constructor.
-   * @returns {Promise<any>}
-   */
-  async receipt(callback) {
-    const t = new ReceiptBuilder({
-      characterWidth: this.characterWidth,
-      charset: this.charset,
-      encoder: this.encoder
-    });
-    await callback(t);
-    return await this._sendBytes(t.build());
-  }
-
-  /**
-   * Construye un comprobante compatible con OpenFactura mediante OpenFacturaBuilder y lo envía a la cola.
-   * @param {Function} callback - Acciones de configuración en la instancia del constructor.
-   * @returns {Promise<any>}
-   */
-  async openFactura(callback) {
-    const t = new OpenFacturaBuilder({
-      characterWidth: this.characterWidth,
-      charset: this.charset,
-      encoder: this.encoder
-    });
-    await callback(t);
-    return await this._sendBytes(t.build());
-  }
-
-  /**
-   * Construye una boleta oficial regulada por el SII mediante SiiReceiptBuilder y la envía a la cola.
-   * @param {Function} callback - Acciones de configuración en la instancia del constructor.
-   * @returns {Promise<any>}
-   */
-  async siiReceipt(callback) {
-    const t = new SiiReceiptBuilder({
-      characterWidth: this.characterWidth,
-      charset: this.charset,
-      encoder: this.encoder
-    });
-    await callback(t);
-    return await this._sendBytes(t.build());
-  }
 
   /**
    * Encola el envío de bytes al canal físico activo de la impresora.
